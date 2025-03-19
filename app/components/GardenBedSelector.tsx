@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { allGardenBeds, GardenBedDefinition, rectangularBeds, circularBeds, getGardenBedById } from '../data/garden-beds'
+import { allGardenBeds, GardenBedDefinition, rectangularBeds, circularBeds } from '../data/garden-beds'
 import { RectangleIcon, CircleIcon } from './Icons'
 import { calculateRectangularVolume, calculateCircularVolume, Dimensions, CircularDimensions, VolumeResult, formatVolumeResult, VolumeUnit } from '../lib/calculations'
 
@@ -43,7 +43,7 @@ export default function GardenBedSelector() {
     } else {
       setTotalVolumeResult(null);
     }
-  }, [selectedBeds]);
+  }, [selectedBeds, displayUnit]);
 
   // Custom dimensions state
   const [customRectangular, setCustomRectangular] = useState<Dimensions>({

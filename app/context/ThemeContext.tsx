@@ -19,8 +19,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   // Initialize theme from local storage or system preference (if available)
   const [theme, setTheme] = useState<ThemeMode>('light');
   
-  // On initial mount, check for saved preference
+  // On initial mount, check for saved preference - only in browser
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') return;
+    
     // Check for saved theme preference in localStorage
     const savedTheme = localStorage.getItem('theme') as ThemeMode | null;
     
@@ -32,8 +35,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, []);
   
-  // Update body class when theme changes
+  // Update body class when theme changes - only in browser
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') return;
+    
     const root = document.documentElement;
     
     if (theme === 'dark') {
