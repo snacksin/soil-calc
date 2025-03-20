@@ -16,7 +16,7 @@
   .footer {
     background-color: #8A2BE2;
     color: #ffffff;
-    @apply py-6;
+    @apply pt-6 pb-6;
   }
   
   .btn {
