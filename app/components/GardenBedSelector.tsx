@@ -22,7 +22,17 @@ export default function GardenBedSelector() {
   const [volumeResult, setVolumeResult] = useState<VolumeResult | null>(null)
   const [totalVolumeResult, setTotalVolumeResult] = useState<VolumeResult | null>(null)
   const [displayUnit, setDisplayUnit] = useState<VolumeUnit>('cubic_feet')
-  
+  const [fillFactor, setFillFactor] = useState<number>(1);
+ function applyFillFactor(volume: VolumeResult, factor: number): VolumeResult {
+   return {
+     cubicFeet: Number((volume.cubicFeet * factor).toFixed(2)),
+     cubicYards: Number((volume.cubicYards * factor).toFixed(2)),
+     cubicMeters: Number((volume.cubicMeters * factor).toFixed(2)),
+     liters: Number((volume.liters * factor).toFixed(2)),
+     gallons: Number((volume.gallons * factor).toFixed(2)),
+     displayUnit: volume.displayUnit
+   };
+ }
   // Update total volume when selected beds change
   useEffect(() => {
     if (selectedBeds.length > 0) {
@@ -63,12 +73,10 @@ export default function GardenBedSelector() {
   function renderBedDimensions(bed: GardenBedDefinition): string {
     const dimensions = bed.dimensions;
     const unit = dimensions.unit === 'feet' ? "ft" : "in";
-    // Convert height to inches if original unit is feet
-    const heightInches = dimensions.unit === 'feet' ? dimensions.height * 12 : dimensions.height;
     if (bed.type === 'rectangular' && 'length' in dimensions) {
-      return `${dimensions.length}${unit} × ${dimensions.width}${unit} × ${heightInches}in`;
+      return `${dimensions.length}${unit} × ${dimensions.width}${unit} × ${dimensions.height}${unit}`;
     } else if (bed.type === 'circular' && 'diameter' in dimensions) {
-      return `${dimensions.diameter}${unit} diameter × ${heightInches}in`;
+      return `${dimensions.diameter}${unit} diameter × ${dimensions.height}${unit}`;
     }
     return "";
   }
@@ -246,7 +254,7 @@ export default function GardenBedSelector() {
                 {renderBedDimensions(allGardenBeds.find(b => b.id === selectedBedId)!)}
               </div>
               <div className="text-sm mt-2 font-semibold text-[var(--color-primary)]">
-                Volume: <span className="text-xl">{formatVolumeResult(volumeResult, 'cubic_feet')}</span>
+                Volume: <span className="text-xl">{formatVolumeResult(applyFillFactor(volumeResult, fillFactor), 'cubic_feet')}</span>
               </div>
             </div>
           )}
