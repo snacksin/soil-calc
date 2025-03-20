@@ -25,6 +25,9 @@ module.exports = {
       backdropBlur: {
         xs: '2px',
       },
+      spacing: {
+        '6': '1.5rem',
+      },
     },
   },
   plugins: [],
