@@ -1,3 +1,37 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  body {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    color: #333333;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer components {
+  .header,
+  .footer {
+    background-color: #8A2BE2;
+    color: #ffffff;
+    @apply py-6;
+  }
+  
+  .btn {
+    background-color: #FF8C42;
+    color: #ffffff;
+    @apply px-4 py-2 font-semibold rounded;
+  }
+  
+  .btn:hover {
+    background-color: #e67c39;
+  }
+}
+
+@layer utilities {
+  .container-custom {
+    @apply px-4 md:px-8;
+  }
+}
