@@ -5,57 +5,73 @@ import { CalculatorIcon, RulerIcon, SaveIcon } from './components/Icons';
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="siimple-content" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Header />
       
-      <main className="flex-grow flex flex-col items-center justify-center">
-        <div className="container flex flex-col items-center py-8">
+      <main style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="siimple-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2rem 0' }}>
           {/* Hero Section */}
-          <div className="text-center mb-12 px-4 animate-fade-in">
-            <h1 className="text-4xl sm:text-5xl font-bold mb-4 text-gradient-fun">
+          <div className="siimple-content" style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <h1 className="siimple-h1">
               Garden Soil Calculator
             </h1>
-            <p className="text-lg text-[var(--color-muted)] max-w-2xl mx-auto animate-slide-up">
+            <p className="siimple-paragraph" style={{ maxWidth: '42rem', margin: '0 auto' }}>
               Quickly calculate the exact amount of soil you need for your garden beds
               with our easy-to-use calculator.
             </p>
           </div>
           
           {/* Calculator */}
-          <div className="w-full">
+          <div style={{ width: '100%' }}>
             <GardenBedSelector />
           </div>
           
           {/* Features Section */}
-          <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-4xl px-4">
-            <div className="glass-panel-fun hover-card p-6 flex flex-col items-center text-center" style={{animationDelay: "0.1s"}}>
-              <div className="text-[var(--color-primary)] mb-3 animate-pulse">
-                <CalculatorIcon />
+          <div className="siimple-content" style={{ marginTop: '4rem' }}>
+            <div className="siimple-grid">
+              <div className="siimple-grid-row">
+                <div className="siimple-grid-col siimple-grid-col--4">
+                  <div className="siimple-card" style={{ textAlign: 'center', padding: '1.5rem' }}>
+                    <div className="siimple-card-header">
+                      <CalculatorIcon />
+                    </div>
+                    <div className="siimple-card-body">
+                      <h3 className="siimple-h5">Precise Calculations</h3>
+                      <p className="siimple-paragraph">
+                        Get accurate soil volume calculations in multiple units for any garden bed shape.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="siimple-grid-col siimple-grid-col--4">
+                  <div className="siimple-card" style={{ textAlign: 'center', padding: '1.5rem' }}>
+                    <div className="siimple-card-header">
+                      <RulerIcon />
+                    </div>
+                    <div className="siimple-card-body">
+                      <h3 className="siimple-h5">Standard Sizes</h3>
+                      <p className="siimple-paragraph">
+                        Choose from 20+ predefined garden bed dimensions or enter your custom measurements.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="siimple-grid-col siimple-grid-col--4">
+                  <div className="siimple-card" style={{ textAlign: 'center', padding: '1.5rem' }}>
+                    <div className="siimple-card-header">
+                      <SaveIcon />
+                    </div>
+                    <div className="siimple-card-body">
+                      <h3 className="siimple-h5">Gardening Tips</h3>
+                      <p className="siimple-paragraph">
+                        Learn about soil types and optimal mixtures for healthy plant growth.
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Precise Calculations</h3>
-              <p className="text-sm text-[var(--color-muted)]">
-                Get accurate soil volume calculations in multiple units for any garden bed shape.
-              </p>
-            </div>
-            
-            <div className="glass-panel-fun hover-card p-6 flex flex-col items-center text-center" style={{animationDelay: "0.2s"}}>
-              <div className="text-[var(--color-secondary)] mb-3 animate-pulse">
-                <RulerIcon />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Standard Sizes</h3>
-              <p className="text-sm text-[var(--color-muted)]">
-                Choose from 20+ predefined garden bed dimensions or enter your custom measurements.
-              </p>
-            </div>
-            
-            <div className="glass-panel-fun hover-card p-6 flex flex-col items-center text-center" style={{animationDelay: "0.3s"}}>
-              <div className="text-[var(--color-accent)] mb-3 animate-pulse">
-                <SaveIcon />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Gardening Tips</h3>
-              <p className="text-sm text-[var(--color-muted)]">
-                Learn about soil types and optimal mixtures for healthy plant growth.
-              </p>
             </div>
           </div>
         </div>

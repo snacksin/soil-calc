@@ -23,16 +23,18 @@ export default function GardenBedSelector() {
   const [totalVolumeResult, setTotalVolumeResult] = useState<VolumeResult | null>(null)
   const [displayUnit, setDisplayUnit] = useState<VolumeUnit>('cubic_feet')
   const [fillFactor, setFillFactor] = useState<number>(1);
- function applyFillFactor(volume: VolumeResult, factor: number): VolumeResult {
-   return {
-     cubicFeet: Number((volume.cubicFeet * factor).toFixed(2)),
-     cubicYards: Number((volume.cubicYards * factor).toFixed(2)),
-     cubicMeters: Number((volume.cubicMeters * factor).toFixed(2)),
-     liters: Number((volume.liters * factor).toFixed(2)),
-     gallons: Number((volume.gallons * factor).toFixed(2)),
-     displayUnit: volume.displayUnit
-   };
- }
+  
+  function applyFillFactor(volume: VolumeResult, factor: number): VolumeResult {
+    return {
+      cubicFeet: Number((volume.cubicFeet * factor).toFixed(2)),
+      cubicYards: Number((volume.cubicYards * factor).toFixed(2)),
+      cubicMeters: Number((volume.cubicMeters * factor).toFixed(2)),
+      liters: Number((volume.liters * factor).toFixed(2)),
+      gallons: Number((volume.gallons * factor).toFixed(2)),
+      displayUnit: volume.displayUnit
+    };
+  }
+  
   // Update total volume when selected beds change
   useEffect(() => {
     if (selectedBeds.length > 0) {
@@ -164,43 +166,31 @@ export default function GardenBedSelector() {
   }
   
   return (
-    <div className="glass-panel-fun p-6 sm:p-8 max-w-4xl w-full animate-fade-in">
-      <h2 className="text-2xl sm:text-3xl font-bold mb-8 text-gradient-fun">Garden Bed Soil Calculator</h2>
+    <div className="siimple-card siimple-content">
+      <h2 className="siimple-h2">Garden Bed Soil Calculator</h2>
       
       {/* Shape Type Tabs */}
-      <div className="flex flex-wrap border-b border-[var(--glass-border)] mb-8">
+      <div className="siimple-tabs">
         <button
-          className={`py-2 px-4 flex items-center gap-2 transition-all duration-300 ${
-            activeTab === 'rectangular'
-              ? 'border-b-2 border-[var(--color-primary)] text-[var(--color-primary)] font-medium translate-y-[1px]'
-              : 'text-[var(--color-muted)] hover:text-[var(--color-foreground)]'
-          }`}
+          className={`siimple-btn ${activeTab === 'rectangular' ? 'siimple-btn--primary' : 'siimple-btn--light'}`}
           onClick={() => setActiveTab('rectangular')}
         >
-          <div className={activeTab === 'rectangular' ? 'animate-pulse' : ''} style={{animationDuration: '3s'}}>
+          <div>
             <RectangleIcon />
           </div>
           Rectangular
         </button>
         <button
-          className={`py-2 px-4 flex items-center gap-2 transition-all duration-300 ${
-            activeTab === 'circular'
-              ? 'border-b-2 border-[var(--color-secondary)] text-[var(--color-secondary)] font-medium translate-y-[1px]'
-              : 'text-[var(--color-muted)] hover:text-[var(--color-foreground)]'
-          }`}
+          className={`siimple-btn ${activeTab === 'circular' ? 'siimple-btn--primary' : 'siimple-btn--light'}`}
           onClick={() => setActiveTab('circular')}
         >
-          <div className={activeTab === 'circular' ? 'animate-pulse' : ''} style={{animationDuration: '3s'}}>
+          <div>
             <CircleIcon />
           </div>
           Circular
         </button>
         <button
-          className={`py-2 px-4 flex items-center gap-2 transition-all duration-300 ${
-            activeTab === 'custom'
-              ? 'border-b-2 border-[var(--color-accent)] text-[var(--color-accent)] font-medium translate-y-[1px]'
-              : 'text-[var(--color-muted)] hover:text-[var(--color-foreground)]'
-          }`}
+          className={`siimple-btn ${activeTab === 'custom' ? 'siimple-btn--primary' : 'siimple-btn--light'}`}
           onClick={() => setActiveTab('custom')}
         >
           Custom
@@ -209,22 +199,12 @@ export default function GardenBedSelector() {
       
       {/* Bed Selection - Dropdown with Add Button */}
       {(activeTab === 'rectangular' || activeTab === 'circular') && (
-        <div className="mb-8 animate-slide-up">
-          <div className="flex flex-col sm:flex-row sm:items-end gap-4 mb-4">
-            <div className="flex-grow">
-              <label className="block text-sm mb-2 text-[var(--color-muted)]">Select a garden bed</label>
+        <div className="siimple-form siimple-content">
+          <div className="siimple-form-row">
+            <div className="siimple-form-field">
+              <label className="siimple-label">Select a garden bed</label>
               <select
-                className="input-glass w-full p-3 text-[var(--color-foreground)] border-2 border-transparent focus:border-[var(--color-primary)] transition-all duration-300"
-                style={{
-                  whiteSpace: "normal",
-                  overflowWrap: "break-word",
-                  minWidth: "280px",
-                  WebkitAppearance: "none",
-                  MozAppearance: "none",
-                  appearance: "none",
-                  textAlign: "left",
-                  lineHeight: "1.5rem"
-                }}
+                className="siimple-select"
                 value={selectedBedId}
                 onChange={(e) => handleBedSelectionChange(e.target.value)}
               >
@@ -240,7 +220,7 @@ export default function GardenBedSelector() {
               </select>
             </div>
             <button
-              className="btn-fun min-w-[120px] py-3"
+              className="siimple-btn siimple-btn--primary"
               onClick={addSelectedBed}
             >
               Add Bed
@@ -249,22 +229,22 @@ export default function GardenBedSelector() {
           
           {/* Preview of selected bed */}
           {volumeResult && (
-            <div className="glass-panel-fun p-4 mb-4 hover-card animate-fade-in">
-              <div className="font-medium text-lg">
+            <div className="siimple-card">
+              <div className="siimple-h5">
                 {allGardenBeds.find(b => b.id === selectedBedId)?.name}
               </div>
-              <div className="text-sm mt-1 text-[var(--color-muted)]">
+              <div className="siimple-small">
                 {renderBedDimensions(allGardenBeds.find(b => b.id === selectedBedId)!)}
               </div>
-              <div className="text-sm mt-2 font-semibold text-[var(--color-primary)]">
-                Volume: <span className="text-xl">{formatVolumeResult(applyFillFactor(volumeResult, fillFactor), 'cubic_feet')}</span>
+              <div className="siimple-paragraph">
+                Volume: <span className="siimple-h4">{formatVolumeResult(applyFillFactor(volumeResult, fillFactor), 'cubic_feet')}</span>
               </div>
-              <div className="mb-4">
-                <label className="block text-sm mb-2 font-medium">Fill Level</label>
+              <div className="siimple-form-field">
+                <label className="siimple-label">Fill Level</label>
                 <select
                   value={fillFactor}
                   onChange={(e) => setFillFactor(parseFloat(e.target.value))}
-                  className="input-glass w-full border-2 border-transparent focus:border-[var(--color-primary)] transition-all"
+                  className="siimple-select"
                 >
                   <option value="0.25">1/4</option>
                   <option value="0.5">1/2</option>
@@ -279,81 +259,81 @@ export default function GardenBedSelector() {
       
       {/* Custom Dimensions */}
       {activeTab === 'custom' && (
-        <div className="mb-8 animate-slide-up">
-          <div className="flex flex-wrap gap-4 mb-4">
+        <div className="siimple-content">
+          <div className="siimple-btn-group">
             <button
-              className={`py-3 px-6 rounded-md transition-all duration-300 ${
-                customShapeType === 'rectangular'
-                  ? 'bg-[var(--color-primary)] text-white shadow-lg transform scale-105'
-                  : 'glass-panel-fun hover:-translate-y-1 hover:shadow-md'
-              }`}
+              className={`siimple-btn ${customShapeType === 'rectangular' ? 'siimple-btn--primary' : 'siimple-btn--light'}`}
               onClick={() => setCustomShapeType('rectangular')}
             >
-              <span className="flex items-center gap-2">
+              <span>
                 <RectangleIcon /> Rectangular
               </span>
             </button>
             <button
-              className={`py-3 px-6 rounded-md transition-all duration-300 ${
-                customShapeType === 'circular'
-                  ? 'bg-[var(--color-accent)] text-white shadow-lg transform scale-105'
-                  : 'glass-panel-fun hover:-translate-y-1 hover:shadow-md'
-              }`}
+              className={`siimple-btn ${customShapeType === 'circular' ? 'siimple-btn--primary' : 'siimple-btn--light'}`}
               onClick={() => setCustomShapeType('circular')}
             >
-              <span className="flex items-center gap-2">
+              <span>
                 <CircleIcon /> Circular
               </span>
             </button>
           </div>
           
           {customShapeType === 'rectangular' && (
-            <div className="glass-panel-fun p-5 animate-fade-in">
-              <h3 className="text-xl font-medium mb-4 text-[var(--color-primary)]">Custom Rectangular Bed</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                <div className="hover-card p-3">
-                  <label className="block text-sm mb-2 font-medium">Length</label>
-                  <input
-                    type="number"
-                    value={customRectangular.length}
-                    onChange={(e) => setCustomRectangular({...customRectangular, length: parseFloat(e.target.value)})}
-                    className="input-glass w-full border-2 border-transparent focus:border-[var(--color-primary)] transition-all"
-                    min="0.1"
-                    step="0.1"
-                  />
-                </div>
-                <div className="hover-card p-3">
-                  <label className="block text-sm mb-2 font-medium">Width</label>
-                  <input
-                    type="number"
-                    value={customRectangular.width}
-                    onChange={(e) => setCustomRectangular({...customRectangular, width: parseFloat(e.target.value)})}
-                    className="input-glass w-full border-2 border-transparent focus:border-[var(--color-primary)] transition-all"
-                    min="0.1"
-                    step="0.1"
-                  />
-                </div>
-                <div className="hover-card p-3">
-                  <label className="block text-sm mb-2 font-medium">Height</label>
-                  <input
-                    type="number"
-                    value={customRectangular.height}
-                    onChange={(e) => setCustomRectangular({...customRectangular, height: parseFloat(e.target.value)})}
-                    className="input-glass w-full border-2 border-transparent focus:border-[var(--color-primary)] transition-all"
-                    min="0.1"
-                    step="0.1"
-                  />
+            <div className="siimple-card">
+              <h3 className="siimple-h3">Custom Rectangular Bed</h3>
+              <div className="siimple-grid">
+                <div className="siimple-grid-row">
+                  <div className="siimple-grid-col siimple-grid-col--4">
+                    <div className="siimple-form-field">
+                      <label className="siimple-label">Length</label>
+                      <input
+                        type="number"
+                        value={customRectangular.length}
+                        onChange={(e) => setCustomRectangular({...customRectangular, length: parseFloat(e.target.value)})}
+                        className="siimple-input"
+                        min="0.1"
+                        step="0.1"
+                      />
+                    </div>
+                  </div>
+                  <div className="siimple-grid-col siimple-grid-col--4">
+                    <div className="siimple-form-field">
+                      <label className="siimple-label">Width</label>
+                      <input
+                        type="number"
+                        value={customRectangular.width}
+                        onChange={(e) => setCustomRectangular({...customRectangular, width: parseFloat(e.target.value)})}
+                        className="siimple-input"
+                        min="0.1"
+                        step="0.1"
+                      />
+                    </div>
+                  </div>
+                  <div className="siimple-grid-col siimple-grid-col--4">
+                    <div className="siimple-form-field">
+                      <label className="siimple-label">Height</label>
+                      <input
+                        type="number"
+                        value={customRectangular.height}
+                        onChange={(e) => setCustomRectangular({...customRectangular, height: parseFloat(e.target.value)})}
+                        className="siimple-input"
+                        min="0.1"
+                        step="0.1"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div className="mb-6">
-                <label className="block text-sm mb-2 font-medium">Unit</label>
+              <div className="siimple-form-field">
+                <label className="siimple-label">Unit</label>
                 <select
                   value={customRectangular.unit}
                   onChange={(e) => setCustomRectangular({
                     ...customRectangular,
                     unit: e.target.value as 'inches' | 'feet' | 'cm' | 'meters'
                   })}
-                  className="input-glass w-full border-2 border-transparent focus:border-[var(--color-primary)] transition-all"
+                  className="siimple-select"
                 >
                   <option value="feet">Feet</option>
                   <option value="inches">Inches</option>
@@ -361,17 +341,16 @@ export default function GardenBedSelector() {
                   <option value="meters">Meters</option>
                 </select>
               </div>
-              <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+              <div className="siimple-btn-group">
                 <button
-                  className="btn-fun bg-[var(--color-primary)] flex-1 py-3"
+                  className="siimple-btn siimple-btn--primary"
                   onClick={calculateCustomVolume}
                 >
                   Calculate Volume
                 </button>
                 {volumeResult && (
                   <button
-                    className="btn-fun bg-[var(--color-success)] flex-1 py-3 animate-pulse"
-                    style={{animationDuration: '2s'}}
+                    className="siimple-btn siimple-btn--success"
                     onClick={addCustomBed}
                   >
                     Add Bed
@@ -382,41 +361,47 @@ export default function GardenBedSelector() {
           )}
           
           {customShapeType === 'circular' && (
-            <div className="glass-panel-fun p-5 animate-fade-in">
-              <h3 className="text-xl font-medium mb-4 text-[var(--color-accent)]">Custom Circular Bed</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                <div className="hover-card p-3">
-                  <label className="block text-sm mb-2 font-medium">Diameter</label>
-                  <input
-                    type="number"
-                    value={customCircular.diameter}
-                    onChange={(e) => setCustomCircular({...customCircular, diameter: parseFloat(e.target.value)})}
-                    className="input-glass w-full border-2 border-transparent focus:border-[var(--color-accent)] transition-all"
-                    min="0.1"
-                    step="0.1"
-                  />
-                </div>
-                <div className="hover-card p-3">
-                  <label className="block text-sm mb-2 font-medium">Height</label>
-                  <input
-                    type="number"
-                    value={customCircular.height}
-                    onChange={(e) => setCustomCircular({...customCircular, height: parseFloat(e.target.value)})}
-                    className="input-glass w-full border-2 border-transparent focus:border-[var(--color-accent)] transition-all"
-                    min="0.1"
-                    step="0.1"
-                  />
+            <div className="siimple-card">
+              <h3 className="siimple-h3">Custom Circular Bed</h3>
+              <div className="siimple-grid">
+                <div className="siimple-grid-row">
+                  <div className="siimple-grid-col siimple-grid-col--6">
+                    <div className="siimple-form-field">
+                      <label className="siimple-label">Diameter</label>
+                      <input
+                        type="number"
+                        value={customCircular.diameter}
+                        onChange={(e) => setCustomCircular({...customCircular, diameter: parseFloat(e.target.value)})}
+                        className="siimple-input"
+                        min="0.1"
+                        step="0.1"
+                      />
+                    </div>
+                  </div>
+                  <div className="siimple-grid-col siimple-grid-col--6">
+                    <div className="siimple-form-field">
+                      <label className="siimple-label">Height</label>
+                      <input
+                        type="number"
+                        value={customCircular.height}
+                        onChange={(e) => setCustomCircular({...customCircular, height: parseFloat(e.target.value)})}
+                        className="siimple-input"
+                        min="0.1"
+                        step="0.1"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div className="mb-6">
-                <label className="block text-sm mb-2 font-medium">Unit</label>
+              <div className="siimple-form-field">
+                <label className="siimple-label">Unit</label>
                 <select
                   value={customCircular.unit}
                   onChange={(e) => setCustomCircular({
                     ...customCircular,
                     unit: e.target.value as 'inches' | 'feet' | 'cm' | 'meters'
                   })}
-                  className="input-glass w-full border-2 border-transparent focus:border-[var(--color-accent)] transition-all"
+                  className="siimple-select"
                 >
                   <option value="feet">Feet</option>
                   <option value="inches">Inches</option>
@@ -424,17 +409,16 @@ export default function GardenBedSelector() {
                   <option value="meters">Meters</option>
                 </select>
               </div>
-              <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+              <div className="siimple-btn-group">
                 <button
-                  className="btn-fun bg-[var(--color-accent)] flex-1 py-3"
+                  className="siimple-btn siimple-btn--primary"
                   onClick={calculateCustomVolume}
                 >
                   Calculate Volume
                 </button>
                 {volumeResult && (
                   <button
-                    className="btn-fun bg-[var(--color-success)] flex-1 py-3 animate-pulse"
-                    style={{animationDuration: '2s'}}
+                    className="siimple-btn siimple-btn--success"
                     onClick={addCustomBed}
                   >
                     Add Bed
@@ -448,32 +432,37 @@ export default function GardenBedSelector() {
       
       {/* Selected Beds List */}
       {selectedBeds.length > 0 && (
-        <div className="glass-panel-fun p-6 mb-8 animate-fade-in">
-          <h3 className="text-xl font-semibold mb-4 text-gradient-fun">Selected Garden Beds</h3>
-          <div className="space-y-4">
-            {selectedBeds.map((entry, index) => {
+        <div className="siimple-card siimple-content">
+          <h3 className="siimple-h3">Selected Garden Beds</h3>
+          <div className="siimple-list">
+            {selectedBeds.map((entry) => {
               const bed = entry.bed;
               return (
                 <div
                   key={entry.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between hover-card bg-[var(--glass-background)] p-4 rounded-lg transition-all duration-300 animate-slide-up"
-                  style={{animationDelay: `${index * 0.1}s`}}
+                  className="siimple-list-item"
                 >
-                  <div className="mb-3 sm:mb-0">
-                    <div className="font-medium text-lg">{bed.name}</div>
-                    <div className="text-sm text-[var(--color-muted)]">
-                      {renderBedDimensions(bed)}
-                    </div>
-                    <div className="text-sm font-semibold text-[var(--color-primary)]">
-                      Volume: {formatVolumeResult(applyFillFactor(entry.volumeResult, fillFactor), 'cubic_feet')}
+                  <div className="siimple-grid">
+                    <div className="siimple-grid-row">
+                      <div className="siimple-grid-col siimple-grid-col--8">
+                        <div className="siimple-h5">{bed.name}</div>
+                        <div className="siimple-small">
+                          {renderBedDimensions(bed)}
+                        </div>
+                        <div className="siimple-paragraph">
+                          Volume: {formatVolumeResult(applyFillFactor(entry.volumeResult, fillFactor), 'cubic_feet')}
+                        </div>
+                      </div>
+                      <div className="siimple-grid-col siimple-grid-col--4">
+                        <button
+                          className="siimple-btn siimple-btn--error"
+                          onClick={() => removeBed(entry.id)}
+                        >
+                          Remove
+                        </button>
+                      </div>
                     </div>
                   </div>
-                  <button
-                    className="btn-fun bg-red-500 hover:bg-red-600 px-4 py-2 text-white rounded-md transition-all"
-                    onClick={() => removeBed(entry.id)}
-                  >
-                    Remove
-                  </button>
                 </div>
               );
             })}
@@ -483,72 +472,84 @@ export default function GardenBedSelector() {
       
       {/* Total Results Section */}
       {totalVolumeResult && (
-        <div className="glass-panel-fun p-6 mt-6 animate-fade-in hover-card">
-          <h3 className="text-2xl font-semibold mb-4 text-gradient-fun">Total Soil Needed</h3>
+        <div className="siimple-card siimple-content">
+          <h3 className="siimple-h3">Total Soil Needed</h3>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-6 mb-6">
-            <div>
-              <div className="text-sm text-[var(--color-muted)]">Total Soil Volume:</div>
-              <div className="text-4xl font-bold text-[var(--color-primary)] mt-2 animate-pulse" style={{animationDuration: '4s'}}>
-                {formatVolumeResult(totalVolumeResult, displayUnit)}
+          <div className="siimple-grid">
+            <div className="siimple-grid-row">
+              <div className="siimple-grid-col siimple-grid-col--6">
+                <div className="siimple-small">Total Soil Volume:</div>
+                <div className="siimple-h1">
+                  {formatVolumeResult(totalVolumeResult, displayUnit)}
+                </div>
+                <div className="siimple-form-field">
+                  <select
+                    value={displayUnit}
+                    onChange={(e) => setDisplayUnit(e.target.value as VolumeUnit)}
+                    className="siimple-select"
+                  >
+                    <option value="cubic_feet">Cubic Feet</option>
+                    <option value="cubic_yards">Cubic Yards</option>
+                    <option value="cubic_meters">Cubic Meters</option>
+                    <option value="liters">Liters</option>
+                    <option value="gallons">Gallons</option>
+                  </select>
+                </div>
               </div>
-              <div className="mt-3">
-                <select
-                  value={displayUnit}
-                  onChange={(e) => setDisplayUnit(e.target.value as VolumeUnit)}
-                  className="input-glass text-sm border-2 border-transparent focus:border-[var(--color-primary)] transition-all"
-                >
-                  <option value="cubic_feet">Cubic Feet</option>
-                  <option value="cubic_yards">Cubic Yards</option>
-                  <option value="cubic_meters">Cubic Meters</option>
-                  <option value="liters">Liters</option>
-                  <option value="gallons">Gallons</option>
-                </select>
-              </div>
-            </div>
-            
-            <div className="glass-card p-4 rounded-lg">
-              <div className="text-sm text-[var(--color-muted)] mb-2">Also expressed as:</div>
-              <div className="grid gap-2 mt-2">
-                <div className="flex justify-between items-center py-1 border-b border-[var(--glass-border)]">
-                  <span>Cubic Feet:</span>
-                  <span className="font-medium text-[var(--color-primary)]">{totalVolumeResult.cubicFeet.toFixed(2)} ft³</span>
-                </div>
-                <div className="flex justify-between items-center py-1 border-b border-[var(--glass-border)]">
-                  <span>Cubic Yards:</span>
-                  <span className="font-medium text-[var(--color-secondary)]">{totalVolumeResult.cubicYards.toFixed(2)} yd³</span>
-                </div>
-                <div className="flex justify-between items-center py-1 border-b border-[var(--glass-border)]">
-                  <span>Cubic Meters:</span>
-                  <span className="font-medium text-[var(--color-accent)]">{totalVolumeResult.cubicMeters.toFixed(2)} m³</span>
-                </div>
-                <div className="flex justify-between items-center py-1">
-                  <span>Liters:</span>
-                  <span className="font-medium text-[var(--color-success)]">{totalVolumeResult.liters.toFixed(2)} L</span>
+              
+              <div className="siimple-grid-col siimple-grid-col--6">
+                <div className="siimple-card">
+                  <div className="siimple-small">Also expressed as:</div>
+                  <div className="siimple-list">
+                    <div className="siimple-list-item">
+                      <span>Cubic Feet:</span>
+                      <span className="siimple-tag siimple-tag--primary">{totalVolumeResult.cubicFeet.toFixed(2)} ft³</span>
+                    </div>
+                    <div className="siimple-list-item">
+                      <span>Cubic Yards:</span>
+                      <span className="siimple-tag siimple-tag--success">{totalVolumeResult.cubicYards.toFixed(2)} yd³</span>
+                    </div>
+                    <div className="siimple-list-item">
+                      <span>Cubic Meters:</span>
+                      <span className="siimple-tag siimple-tag--info">{totalVolumeResult.cubicMeters.toFixed(2)} m³</span>
+                    </div>
+                    <div className="siimple-list-item">
+                      <span>Liters:</span>
+                      <span className="siimple-tag siimple-tag--warning">{totalVolumeResult.liters.toFixed(2)} L</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
           
-          <div className="glass-panel-fun p-5 mt-6 border-2 border-[var(--color-success)] hover-card">
-            <h4 className="font-medium mb-2 text-[var(--color-success)]">🌱 Need help with soil?</h4>
-            <p className="text-sm">
+          <div className="siimple-alert siimple-alert--success">
+            <h4 className="siimple-h5">🌱 Need help with soil?</h4>
+            <p className="siimple-paragraph">
               Most garden beds perform best with a mix of:
-              <div className="grid grid-cols-3 gap-2 mt-2 text-center">
-                <div className="bg-[var(--color-primary-light)] bg-opacity-20 p-2 rounded-lg">
-                  <div className="font-bold">60%</div>
-                  <div className="text-xs">Topsoil</div>
+            </p>
+            <div className="siimple-grid">
+              <div className="siimple-grid-row">
+                <div className="siimple-grid-col siimple-grid-col--4">
+                  <div className="siimple-card siimple-card--primary">
+                    <div className="siimple-h4">60%</div>
+                    <div className="siimple-small">Topsoil</div>
+                  </div>
                 </div>
-                <div className="bg-[var(--color-accent)] bg-opacity-20 p-2 rounded-lg">
-                  <div className="font-bold">30%</div>
-                  <div className="text-xs">Compost</div>
+                <div className="siimple-grid-col siimple-grid-col--4">
+                  <div className="siimple-card siimple-card--info">
+                    <div className="siimple-h4">30%</div>
+                    <div className="siimple-small">Compost</div>
+                  </div>
                 </div>
-                <div className="bg-[var(--color-secondary)] bg-opacity-20 p-2 rounded-lg">
-                  <div className="font-bold">10%</div>
-                  <div className="text-xs">Aeration Material</div>
+                <div className="siimple-grid-col siimple-grid-col--4">
+                  <div className="siimple-card siimple-card--warning">
+                    <div className="siimple-h4">10%</div>
+                    <div className="siimple-small">Aeration Material</div>
+                  </div>
                 </div>
               </div>
-            </p>
+            </div>
           </div>
         </div>
       )}

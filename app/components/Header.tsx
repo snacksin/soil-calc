@@ -3,14 +3,14 @@ import Link from 'next/link';
 export default function Header() {
   return (
     <header className="header">
-      <div className="container-custom flex justify-between items-center">
+      <div className="container-custom siimple-navbar">
         <Link href="/">
-          <span className="no-underline font-bold text-xl sm:text-2xl">
+          <span className="siimple-navbar-title" style={{ textDecoration: 'none' }}>
             Garden Soil Calculator
           </span>
         </Link>
         <div>
-          <button className="btn" aria-label="Switch to dark mode">
+          <button className="btn siimple-btn siimple-btn--primary" aria-label="Switch to dark mode">
             Switch Theme
           </button>
         </div>

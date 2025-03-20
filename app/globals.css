@@ -1,37 +1,96 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer base {
-  body {
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(10px);
-    color: #333333;
-    font-family: 'Inter', sans-serif;
-  }
+/* Base styles - replacing @tailwind base */
+body {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  color: #333333;
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-@layer components {
-  .header,
-  .footer {
-    background-color: #8A2BE2;
-    color: #ffffff;
-    @apply pt-6 pb-6;
-  }
-  
-  .btn {
-    background-color: #FF8C42;
-    color: #ffffff;
-    @apply px-4 py-2 font-semibold rounded;
-  }
-  
-  .btn:hover {
-    background-color: #e67c39;
-  }
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-@layer utilities {
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+/* Components - replacing @tailwind components */
+.header,
+.footer {
+  background-color: #8A2BE2;
+  color: #ffffff;
+  padding-top: 1.5rem;    /* replacing pt-6 */
+  padding-bottom: 1.5rem; /* replacing pb-6 */
+}
+
+.btn {
+  background-color: #FF8C42;
+  color: #ffffff;
+  padding-left: 1rem;     /* replacing px-4 */
+  padding-right: 1rem;    /* replacing px-4 */
+  padding-top: 0.5rem;    /* replacing py-2 */
+  padding-bottom: 0.5rem; /* replacing py-2 */
+  font-weight: 600;       /* replacing font-semibold */
+  border-radius: 0.25rem; /* replacing rounded */
+  border: none;
+  cursor: pointer;
+  display: inline-block;
+  text-align: center;
+  text-decoration: none;
+}
+
+.btn:hover {
+  background-color: #e67c39;
+}
+
+/* Utilities - replacing @tailwind utilities */
+.container-custom {
+  padding-left: 1rem;    /* replacing px-4 */
+  padding-right: 1rem;   /* replacing px-4 */
+  width: 100%;
+  margin: 0 auto;
+  max-width: 80rem;      /* ~1280px */
+}
+
+@media (min-width: 768px) {
   .container-custom {
-    @apply px-4 md:px-8;
+    padding-left: 2rem;  /* replacing md:px-8 */
+    padding-right: 2rem; /* replacing md:px-8 */
   }
+}
+
+/* Custom CSS Variables - replacing Tailwind config theme variables */
+:root {
+  --color-primary: #8A2BE2;    /* Purple */
+  --color-secondary: #FF8C42;  /* Orange */
+  --color-accent: #4285F4;     /* Blue */
+  --color-background: #FFFFFF; /* White */
+  --color-foreground: #333333; /* Dark Gray */
+  --glass-border: rgba(255, 255, 255, 0.3);
+}
+
+/* Dark theme variables */
+.dark {
+  --color-primary: #9D4EDD;    /* Lighter Purple */
+  --color-secondary: #FFA364;  /* Lighter Orange */
+  --color-accent: #5E9BFF;     /* Lighter Blue */
+  --color-background: #1A1A1A; /* Dark Gray */
+  --color-foreground: #F5F5F5; /* Light Gray */
+  --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+/* Additional utility classes that might be needed */
+.antialiased {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Siimple CSS integration helpers */
+.siimple-content {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
