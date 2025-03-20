@@ -256,6 +256,19 @@ export default function GardenBedSelector() {
               <div className="text-sm mt-2 font-semibold text-[var(--color-primary)]">
                 Volume: <span className="text-xl">{formatVolumeResult(applyFillFactor(volumeResult, fillFactor), 'cubic_feet')}</span>
               </div>
+              <div className="mb-4">
+                <label className="block text-sm mb-2 font-medium">Fill Level</label>
+                <select
+                  value={fillFactor}
+                  onChange={(e) => setFillFactor(parseFloat(e.target.value))}
+                  className="input-glass w-full border-2 border-transparent focus:border-[var(--color-primary)] transition-all"
+                >
+                  <option value="0.25">1/4</option>
+                  <option value="0.5">1/2</option>
+                  <option value="0.75">3/4</option>
+                  <option value="1">Full</option>
+                </select>
+              </div>
             </div>
           )}
         </div>
