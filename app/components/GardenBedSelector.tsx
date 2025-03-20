@@ -36,8 +36,11 @@ export default function GardenBedSelector() {
   // Update total volume when selected beds change
   useEffect(() => {
     if (selectedBeds.length > 0) {
-      // Calculate total cubic feet
-      const totalCubicFeet = selectedBeds.reduce((sum, entry) => sum + entry.volumeResult.cubicFeet, 0);
+      // Calculate total cubic feet with fill factor applied for each bed
+      const totalCubicFeet = selectedBeds.reduce(
+        (sum, entry) => sum + applyFillFactor(entry.volumeResult, fillFactor).cubicFeet,
+        0
+      );
       
       // Create a new volume result with total values
       const newTotalVolume: VolumeResult = {
@@ -53,7 +56,7 @@ export default function GardenBedSelector() {
     } else {
       setTotalVolumeResult(null);
     }
-  }, [selectedBeds, displayUnit]);
+  }, [selectedBeds, displayUnit, fillFactor]);
 
   // Custom dimensions state
   const [customRectangular, setCustomRectangular] = useState<Dimensions>({
@@ -462,7 +465,7 @@ export default function GardenBedSelector() {
                       {renderBedDimensions(bed)}
                     </div>
                     <div className="text-sm font-semibold text-[var(--color-primary)]">
-                      Volume: {formatVolumeResult(entry.volumeResult, 'cubic_feet')}
+                      Volume: {formatVolumeResult(applyFillFactor(entry.volumeResult, fillFactor), 'cubic_feet')}
                     </div>
                   </div>
                   <button
