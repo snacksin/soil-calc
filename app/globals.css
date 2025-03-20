@@ -1,4 +1,4 @@
-/* Base styles - replacing @tailwind base */
+/* Base styles */
 body {
   background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(10px);
@@ -18,24 +18,24 @@ html {
   box-sizing: inherit;
 }
 
-/* Components - replacing @tailwind components */
+/* Components */
 .header,
 .footer {
   background-color: #8A2BE2;
   color: #ffffff;
-  padding-top: 1.5rem;    /* replacing pt-6 */
-  padding-bottom: 1.5rem; /* replacing pb-6 */
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
 }
 
 .btn {
   background-color: #FF8C42;
   color: #ffffff;
-  padding-left: 1rem;     /* replacing px-4 */
-  padding-right: 1rem;    /* replacing px-4 */
-  padding-top: 0.5rem;    /* replacing py-2 */
-  padding-bottom: 0.5rem; /* replacing py-2 */
-  font-weight: 600;       /* replacing font-semibold */
-  border-radius: 0.25rem; /* replacing rounded */
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  font-weight: 600;
+  border-radius: 0.25rem;
   border: none;
   cursor: pointer;
   display: inline-block;
@@ -47,10 +47,10 @@ html {
   background-color: #e67c39;
 }
 
-/* Utilities - replacing @tailwind utilities */
+/* Utilities */
 .container-custom {
-  padding-left: 1rem;    /* replacing px-4 */
-  padding-right: 1rem;   /* replacing px-4 */
+  padding-left: 1rem;
+  padding-right: 1rem;
   width: 100%;
   margin: 0 auto;
   max-width: 80rem;      /* ~1280px */
@@ -58,12 +58,12 @@ html {
 
 @media (min-width: 768px) {
   .container-custom {
-    padding-left: 2rem;  /* replacing md:px-8 */
-    padding-right: 2rem; /* replacing md:px-8 */
+    padding-left: 2rem;
+    padding-right: 2rem;
   }
 }
 
-/* Custom CSS Variables - replacing Tailwind config theme variables */
+/* Custom CSS Variables */
 :root {
   --color-primary: #8A2BE2;    /* Purple */
   --color-secondary: #FF8C42;  /* Orange */
@@ -83,7 +83,7 @@ html {
   --glass-border: rgba(255, 255, 255, 0.1);
 }
 
-/* Additional utility classes that might be needed */
+/* Additional utility classes */
 .antialiased {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
