@@ -22,15 +22,28 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <ThemeProvider>{children}</ThemeProvider>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <ThemeProvider>
+          <header className="header">
+            <div className="container-custom">
+              <h1>Garden Soil Calculator</h1>
+              <button className="btn">Get Started</button>
+            </div>
+          </header>
+          <main className="container-custom">
+            {children}
+          </main>
+          <footer className="footer">
+            <div className="container-custom">
+              <p>&copy; 2025 Garden Soil Calculator Team</p>
+            </div>
+          </footer>
+        </ThemeProvider>
       </body>
     </html>
   );
