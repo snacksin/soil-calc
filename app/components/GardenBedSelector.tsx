@@ -418,6 +418,11 @@ export default function GardenBedSelector() {
               
               {/* Detailed volume information */}
               <VolumeResultDisplay volume={volumeResult} fillFactor={fillFactor} displayUnit={displayUnit} />
+              <div style={{ textAlign: 'center', marginTop: '20px' }}>
+                <button className="btn" onClick={addSelectedBed} style={{ backgroundColor: '#4CAF50' }}>
+                  Add Bed
+                </button>
+              </div>
             </div>
           )}
         </div>
