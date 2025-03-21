@@ -1,25 +1,8 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { ThemeProvider } from "./context/ThemeContext";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
-import "./globals.css";
+import './globals.css';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-export const metadata: Metadata = {
+export const metadata = {
   title: "Garden Soil Calculator",
-  description: "Calculate soil volumes and costs for garden beds",
-  keywords: ["garden", "soil", "calculator", "gardening", "raised beds"],
-  authors: [{ name: "Garden Soil Calculator Team" }],
+  description: "Calculate your garden's soil volume accurately."
 };
 
 export default function RootLayout({
@@ -28,21 +11,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <link 
-          rel="stylesheet" 
-          href="https://cdn.jsdelivr.net/npm/siimple/dist/siimple.min.css" 
-        />
-      </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ThemeProvider>
-          <Header />
-          <main className="container-custom">
-            {children}
-          </main>
-          <Footer />
-        </ThemeProvider>
+    <html lang="en">
+      <body>
+        {children}
       </body>
     </html>
   );
