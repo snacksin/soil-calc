@@ -37,7 +37,20 @@ export default function GardenBedSelector() {
       displayUnit: volume.displayUnit
     };
   }
-  
+function convertToFeet(value: number, unit: string): number {
+switch(unit) {
+case 'feet':
+ return value;
+case 'inches':
+ return value / 12;
+case 'cm':
+ return value * 0.0328084;
+case 'meters':
+ return value * 3.28084;
+default:
+ return value;
+}
+}
   // Update total volume when selected beds change
   useEffect(() => {
     try {
@@ -80,17 +93,20 @@ export default function GardenBedSelector() {
   }, [selectedBeds, displayUnit]); // Removed fillFactor dependency since we use each bed's savedFillFactor
 
   // Custom dimensions state
-  const [customRectangular, setCustomRectangular] = useState<Dimensions>({
+  const [customRectangular, setCustomRectangular] = useState({
     length: 4,
+    lengthUnit: 'feet',
     width: 4,
+    widthUnit: 'feet',
     height: 1,
-    unit: 'feet'
+    heightUnit: 'feet'
   })
   
-  const [customCircular, setCustomCircular] = useState<CircularDimensions>({
+  const [customCircular, setCustomCircular] = useState({
     diameter: 4,
     height: 1,
-    unit: 'feet'
+    diameterUnit: 'feet' as 'inches' | 'feet' | 'cm' | 'meters',
+    heightUnit: 'feet' as 'inches' | 'feet' | 'cm' | 'meters'
   })
 
   // Helper function to render bed dimensions for dropdown (with height always in inches)
@@ -210,10 +226,21 @@ export default function GardenBedSelector() {
       const customBed: GardenBedDefinition = {
         id: customId,
         name: customShapeType === 'rectangular'
-          ? `Custom Rectangular (${customRectangular.length}${customRectangular.unit === 'feet' ? 'ft' : 'in'} × ${customRectangular.width}${customRectangular.unit === 'feet' ? 'ft' : 'in'})`
-          : `Custom Circular (${customCircular.diameter}${customCircular.unit === 'feet' ? 'ft' : 'in'} diameter)`,
-        type: customShapeType,
-        dimensions: customShapeType === 'rectangular' ? {...customRectangular} : {...customCircular}
+          ? `Custom Rectangular (L: ${customRectangular.length} ${customRectangular.lengthUnit}, W: ${customRectangular.width} ${customRectangular.widthUnit}, H: ${customRectangular.height} ${customRectangular.heightUnit})`
+          : `Custom Circular (${customCircular.diameter} ${customCircular.diameterUnit} diameter × ${customCircular.height} ${customCircular.heightUnit} height)`,
+          type: customShapeType,
+          dimensions: customShapeType === 'rectangular'
+            ? {
+                length: convertToFeet(customRectangular.length, customRectangular.lengthUnit),
+                width: convertToFeet(customRectangular.width, customRectangular.widthUnit),
+                height: convertToFeet(customRectangular.height, customRectangular.heightUnit),
+                unit: 'feet'
+              }
+            : {
+                diameter: convertToFeet(customCircular.diameter, customCircular.diameterUnit),
+                height: convertToFeet(customCircular.height, customCircular.heightUnit),
+                unit: 'feet'
+              }
       };
       
       setSelectedBeds([...selectedBeds, {
@@ -245,11 +272,21 @@ export default function GardenBedSelector() {
       if (customShapeType === 'rectangular') {
         // Log dimensions for debugging
         console.log('Calculating volume for rectangular bed:', customRectangular);
-        result = calculateRectangularVolume(customRectangular);
+        result = calculateRectangularVolume({
+          length: convertToFeet(customRectangular.length, customRectangular.lengthUnit),
+          width: convertToFeet(customRectangular.width, customRectangular.widthUnit),
+          height: convertToFeet(customRectangular.height, customRectangular.heightUnit),
+          unit: 'feet'
+        });
       } else if (customShapeType === 'circular') {
         // Log dimensions for debugging
-        console.log('Calculating volume for circular bed:', customCircular);
-        result = calculateCircularVolume(customCircular);
+        const circularCalc = {
+          diameter: convertToFeet(customCircular.diameter, customCircular.diameterUnit),
+          height: convertToFeet(customCircular.height, customCircular.heightUnit),
+          unit: 'feet' as 'feet' | 'inches' | 'cm' | 'meters'
+        };
+        console.log('Calculating volume for circular bed:', circularCalc);
+        result = calculateCircularVolume(circularCalc);
       } else {
         setCalculationError('Invalid shape type selected');
         return;
@@ -268,6 +305,14 @@ export default function GardenBedSelector() {
       setVolumeResult(null);
     }
   }
+  
+  // Automatically recalculate volume when custom dimensions change
+  useEffect(() => {
+    if (activeTab === 'custom') {
+      calculateCustomVolume();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [customRectangular, customCircular, customShapeType, activeTab]);
   
   return (
     <div className="content-section">
@@ -524,31 +569,85 @@ export default function GardenBedSelector() {
                   />
                 </div>
               </div>
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: 'var(--color-primary)' }}>Unit</label>
-                <select
-                  value={customRectangular.unit}
-                  onChange={(e) => setCustomRectangular({
-                    ...customRectangular,
-                    unit: e.target.value as 'inches' | 'feet' | 'cm' | 'meters'
-                  })}
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    borderRadius: '8px',
-                    border: '2px solid rgba(255, 122, 89, 0.5)',
-                    background: 'rgba(255, 255, 255, 0.25)',
-                    backdropFilter: 'blur(5px)',
-                    color: 'inherit',
-                    boxShadow: '0 0 10px rgba(255, 122, 89, 0.2)',
-                    fontWeight: '500'
-                  }}
-                >
-                  <option value="feet">Feet</option>
-                  <option value="inches">Inches</option>
-                  <option value="cm">Centimeters</option>
-                  <option value="meters">Meters</option>
-                </select>
+              <div style={{ marginBottom: '20px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: 'var(--color-primary)' }}>Length Unit</label>
+                  <select
+                    value={customRectangular.lengthUnit}
+                    onChange={(e) => setCustomRectangular({
+                      ...customRectangular,
+                      lengthUnit: e.target.value as 'inches' | 'feet' | 'cm' | 'meters'
+                    })}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '8px',
+                      border: '2px solid rgba(255, 122, 89, 0.5)',
+                      background: 'rgba(255, 255, 255, 0.25)',
+                      backdropFilter: 'blur(5px)',
+                      color: 'inherit',
+                      boxShadow: '0 0 10px rgba(255, 122, 89, 0.2)',
+                      fontWeight: '500'
+                    }}
+                  >
+                    <option value="feet">Feet</option>
+                    <option value="inches">Inches</option>
+                    <option value="cm">Centimeters</option>
+                    <option value="meters">Meters</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: 'var(--color-primary)' }}>Width Unit</label>
+                  <select
+                    value={customRectangular.widthUnit}
+                    onChange={(e) => setCustomRectangular({
+                      ...customRectangular,
+                      widthUnit: e.target.value as 'inches' | 'feet' | 'cm' | 'meters'
+                    })}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '8px',
+                      border: '2px solid rgba(255, 122, 89, 0.5)',
+                      background: 'rgba(255, 255, 255, 0.25)',
+                      backdropFilter: 'blur(5px)',
+                      color: 'inherit',
+                      boxShadow: '0 0 10px rgba(255, 122, 89, 0.2)',
+                      fontWeight: '500'
+                    }}
+                  >
+                    <option value="feet">Feet</option>
+                    <option value="inches">Inches</option>
+                    <option value="cm">Centimeters</option>
+                    <option value="meters">Meters</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: 'var(--color-primary)' }}>Height Unit</label>
+                  <select
+                    value={customRectangular.heightUnit}
+                    onChange={(e) => setCustomRectangular({
+                      ...customRectangular,
+                      heightUnit: e.target.value as 'inches' | 'feet' | 'cm' | 'meters'
+                    })}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '8px',
+                      border: '2px solid rgba(255, 122, 89, 0.5)',
+                      background: 'rgba(255, 255, 255, 0.25)',
+                      backdropFilter: 'blur(5px)',
+                      color: 'inherit',
+                      boxShadow: '0 0 10px rgba(255, 122, 89, 0.2)',
+                      fontWeight: '500'
+                    }}
+                  >
+                    <option value="feet">Feet</option>
+                    <option value="inches">Inches</option>
+                    <option value="cm">Centimeters</option>
+                    <option value="meters">Meters</option>
+                  </select>
+                </div>
               </div>
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
                 <button
@@ -620,31 +719,59 @@ export default function GardenBedSelector() {
                   />
                 </div>
               </div>
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: 'var(--color-primary)' }}>Unit</label>
-                <select
-                  value={customCircular.unit}
-                  onChange={(e) => setCustomCircular({
-                    ...customCircular,
-                    unit: e.target.value as 'inches' | 'feet' | 'cm' | 'meters'
-                  })}
-                  style={{
-                    width: '100%',
-                    padding: '10px',
-                    borderRadius: '8px',
-                    border: '2px solid rgba(255, 122, 89, 0.5)',
-                    background: 'rgba(255, 255, 255, 0.25)',
-                    backdropFilter: 'blur(5px)',
-                    color: 'inherit',
-                    boxShadow: '0 0 10px rgba(255, 122, 89, 0.2)',
-                    fontWeight: '500'
-                  }}
-                >
-                  <option value="feet">Feet</option>
-                  <option value="inches">Inches</option>
-                  <option value="cm">Centimeters</option>
-                  <option value="meters">Meters</option>
-                </select>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '20px' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: 'var(--color-primary)' }}>Diameter Unit</label>
+                  <select
+                    value={customCircular.diameterUnit}
+                    onChange={(e) => setCustomCircular({
+                      ...customCircular,
+                      diameterUnit: e.target.value as 'inches' | 'feet' | 'cm' | 'meters'
+                    })}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '8px',
+                      border: '2px solid rgba(255, 122, 89, 0.5)',
+                      background: 'rgba(255, 255, 255, 0.25)',
+                      backdropFilter: 'blur(5px)',
+                      color: 'inherit',
+                      boxShadow: '0 0 10px rgba(255, 122, 89, 0.2)',
+                      fontWeight: '500'
+                    }}
+                  >
+                    <option value="feet">Feet</option>
+                    <option value="inches">Inches</option>
+                    <option value="cm">Centimeters</option>
+                    <option value="meters">Meters</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: 'var(--color-primary)' }}>Height Unit</label>
+                  <select
+                    value={customCircular.heightUnit}
+                    onChange={(e) => setCustomCircular({
+                      ...customCircular,
+                      heightUnit: e.target.value as 'inches' | 'feet' | 'cm' | 'meters'
+                    })}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      borderRadius: '8px',
+                      border: '2px solid rgba(255, 122, 89, 0.5)',
+                      background: 'rgba(255, 255, 255, 0.25)',
+                      backdropFilter: 'blur(5px)',
+                      color: 'inherit',
+                      boxShadow: '0 0 10px rgba(255, 122, 89, 0.2)',
+                      fontWeight: '500'
+                    }}
+                  >
+                    <option value="feet">Feet</option>
+                    <option value="inches">Inches</option>
+                    <option value="cm">Centimeters</option>
+                    <option value="meters">Meters</option>
+                  </select>
+                </div>
               </div>
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
                 <button
