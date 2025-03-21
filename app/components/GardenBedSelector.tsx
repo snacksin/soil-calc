@@ -110,12 +110,9 @@ export default function GardenBedSelector() {
     const bed = allGardenBeds.find(b => b.id === selectedBedId);
     if (!bed || !volumeResult) return;
     
-    // Check if bed is already in the list
-    const alreadyExists = selectedBeds.some(entry => entry.id === selectedBedId);
-    if (alreadyExists) return;
-    
+    // Allow duplicate bed entries by generating a unique id for each addition
     setSelectedBeds([...selectedBeds, {
-      id: selectedBedId,
+      id: selectedBedId + '-' + Date.now(),
       bed,
       volumeResult
     }]);
