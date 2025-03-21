@@ -1,12 +1,15 @@
+/* Google Fonts Import */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Roboto:wght@300;400;500&display=swap');
+
 /* Base styles */
 body {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
+  background: linear-gradient(135deg, rgba(255, 122, 89, 0.1), rgba(102, 51, 153, 0.1));
   color: #333333;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Roboto', sans-serif;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  min-height: 100vh;
 }
 
 html {
@@ -18,33 +21,127 @@ html {
   box-sizing: inherit;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  margin-top: 0;
+}
+
+/* Glassmorphism Components */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  transition: all 0.3s ease;
+}
+
+.glass-panel:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.02);
+}
+
+/* Bento Box Layout */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-auto-rows: minmax(100px, auto);
+  gap: 20px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.bento-span-4 {
+  grid-column: span 4;
+}
+
+.bento-span-6 {
+  grid-column: span 6;
+}
+
+.bento-span-8 {
+  grid-column: span 8;
+}
+
+.bento-span-12 {
+  grid-column: span 12;
+}
+
+.bento-tall {
+  grid-row: span 2;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .bento-span-4, .bento-span-6, .bento-span-8 {
+    grid-column: span 6;
+  }
+}
+
+@media (max-width: 768px) {
+  .bento-grid {
+    gap: 15px;
+    padding: 15px;
+  }
+  
+  .bento-span-4, .bento-span-6, .bento-span-8, .bento-span-12 {
+    grid-column: span 12;
+  }
+  
+  .bento-tall {
+    grid-row: span 1;
+  }
+}
+
 /* Components */
 .header,
 .footer {
-  background-color: #8A2BE2;
+  background-color: #663399;
   color: #ffffff;
   padding-top: 1.5rem;
   padding-bottom: 1.5rem;
 }
 
 .btn {
-  background-color: #FF8C42;
+  background-color: #FF7A59;
   color: #ffffff;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  padding-top: 0.5rem;
-  padding-bottom: 0.5rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
   font-weight: 600;
-  border-radius: 0.25rem;
+  border-radius: 8px;
   border: none;
   cursor: pointer;
   display: inline-block;
   text-align: center;
   text-decoration: none;
+  transition: all 0.3s ease;
+  font-family: 'Poppins', sans-serif;
 }
 
 .btn:hover {
-  background-color: #e67c39;
+  background-color: #e86c4d;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(255, 122, 89, 0.4);
+}
+
+.btn-secondary {
+  background-color: #663399;
+}
+
+.btn-secondary:hover {
+  background-color: #552b80;
+  box-shadow: 0 5px 15px rgba(102, 51, 153, 0.4);
+}
+
+.accent-text {
+  color: #FFDAB9;
 }
 
 /* Utilities */
@@ -63,24 +160,35 @@ html {
   }
 }
 
+/* Text on glass background needs better contrast */
+.glass-text {
+  background-color: rgba(0, 0, 0, 0.4);
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #fff;
+}
+
 /* Custom CSS Variables */
 :root {
-  --color-primary: #8A2BE2;    /* Purple */
-  --color-secondary: #FF8C42;  /* Orange */
-  --color-accent: #4285F4;     /* Blue */
+  --color-primary: #FF7A59;    /* Vibrant orange */
+  --color-secondary: #663399;  /* Deep purple */
+  --color-accent: #FFDAB9;     /* Soft peach */
   --color-background: #FFFFFF; /* White */
   --color-foreground: #333333; /* Dark Gray */
   --glass-border: rgba(255, 255, 255, 0.3);
+  --glass-background: rgba(255, 255, 255, 0.2);
+  --glass-blur: blur(10px);
 }
 
 /* Dark theme variables */
 .dark {
-  --color-primary: #9D4EDD;    /* Lighter Purple */
-  --color-secondary: #FFA364;  /* Lighter Orange */
-  --color-accent: #5E9BFF;     /* Lighter Blue */
+  --color-primary: #FF8C6A;    /* Lighter Orange */
+  --color-secondary: #7B42B6;  /* Lighter Purple */
+  --color-accent: #FFE4C9;     /* Lighter Peach */
   --color-background: #1A1A1A; /* Dark Gray */
   --color-foreground: #F5F5F5; /* Light Gray */
   --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-background: rgba(255, 255, 255, 0.1);
 }
 
 /* Additional utility classes */
@@ -89,7 +197,26 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Siimple CSS integration helpers */
+/* Content spacing */
+.content-section {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Accessibility helper */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Legacy Siimple CSS integration helpers */
 .siimple-content {
   margin-top: 1rem;
   margin-bottom: 1rem;
