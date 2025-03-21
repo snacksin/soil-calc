@@ -5,6 +5,7 @@ import { allGardenBeds, GardenBedDefinition, rectangularBeds, circularBeds } fro
 import { RectangleIcon, CircleIcon } from './Icons'
 import { calculateRectangularVolume, calculateCircularVolume, Dimensions, CircularDimensions, VolumeResult, formatVolumeResult, VolumeUnit } from '../lib/calculations'
 import VolumeResultDisplay from './VolumeResultDisplay'
+import BagCalculator from './BagCalculator'
 
 type ShapeTabType = 'rectangular' | 'circular' | 'custom';
 type CustomShapeType = 'rectangular' | 'circular';
@@ -370,13 +371,6 @@ export default function GardenBedSelector() {
                 ))}
               </select>
             </div>
-            <button
-              className="btn"
-              onClick={addSelectedBed}
-              style={{ flexShrink: 0 }}
-            >
-              Add Bed
-            </button>
           </div>
           
           {/* Preview of selected bed with volume calculation display */}
@@ -807,6 +801,11 @@ export default function GardenBedSelector() {
             </div>
           </div>
           
+          {/* Bag Calculator section */}
+          <div className="glass-panel" style={{ marginTop: '24px', padding: '24px', border: '1px solid var(--glass-border)' }}>
+            <BagCalculator volumeTotal={totalVolumeResult.cubicFeet} />
+          </div>
+
           <div className="glass-panel" style={{ marginTop: '24px', padding: '24px', border: '1px solid rgba(255, 255, 255, 0.2)', backgroundColor: 'rgba(76, 175, 80, 0.1)' }}>
             <h4 style={{ color: 'var(--color-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ fontSize: '1.5rem' }}>🌱</span> Need help with soil?
@@ -831,6 +830,8 @@ export default function GardenBedSelector() {
           </div>
         </div>
       )}
+      
+      
     </div>
   )
 }
