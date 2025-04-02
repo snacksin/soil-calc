@@ -1,4 +1,5 @@
 import './globals.css';
+import { ThemeProvider } from './context/ThemeContext'; // Import the provider
 
 export const metadata = {
   title: "Garden Soil Calculator",
@@ -12,8 +13,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      {/* ThemeProvider needs 'use client', but layout is Server Component.
+          We apply ThemeProvider inside body to keep <html>/<body> tags server-rendered
+          while allowing context to work for client components within {children}.
+          The ThemeProvider itself handles adding/removing the 'dark' class to <html>.
+      */}
       <body>
-        {children}
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

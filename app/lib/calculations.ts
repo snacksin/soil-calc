@@ -11,13 +11,15 @@ export interface Dimensions {
   length: number;
   width: number;
   height: number;
-  unit: DimensionUnit;
+  lengthWidthUnit: DimensionUnit;
+  heightUnit: DimensionUnit;
 }
 
 export interface CircularDimensions {
   diameter: number;
   height: number;
-  unit: DimensionUnit;
+  diameterUnit: DimensionUnit;
+  heightUnit: DimensionUnit;
 }
 
 export interface VolumeResult {
@@ -63,8 +65,8 @@ export function validateDimensions(dimensions: Dimensions | CircularDimensions):
   const MAX_DIMENSION = 1000; // feet
   
   if ('length' in dimensions) {
-    const lengthFt = standardizeDimensions(dimensions.length, dimensions.unit);
-    const widthFt = standardizeDimensions(dimensions.width, dimensions.unit);
+    const lengthFt = standardizeDimensions(dimensions.length, dimensions.lengthWidthUnit);
+    const widthFt = standardizeDimensions(dimensions.width, dimensions.lengthWidthUnit);
     if (lengthFt > MAX_DIMENSION) {
       throw new CalculationError(`Length exceeds maximum allowed value (${MAX_DIMENSION} feet when converted)`);
     }
@@ -72,13 +74,13 @@ export function validateDimensions(dimensions: Dimensions | CircularDimensions):
       throw new CalculationError(`Width exceeds maximum allowed value (${MAX_DIMENSION} feet when converted)`);
     }
   } else if ('diameter' in dimensions) {
-    const diameterFt = standardizeDimensions(dimensions.diameter, dimensions.unit);
+    const diameterFt = standardizeDimensions(dimensions.diameter, dimensions.diameterUnit);
     if (diameterFt > MAX_DIMENSION) {
       throw new CalculationError(`Diameter exceeds maximum allowed value (${MAX_DIMENSION} feet when converted)`);
     }
   }
   
-  const heightFt = standardizeDimensions(dimensions.height, dimensions.unit);
+  const heightFt = standardizeDimensions(dimensions.height, dimensions.heightUnit);
   if (heightFt > MAX_DIMENSION) {
     throw new CalculationError(`Height exceeds maximum allowed value (${MAX_DIMENSION} feet when converted)`);
   }
@@ -119,9 +121,9 @@ export function calculateRectangularVolume(dimensions: Dimensions): VolumeResult
     validateDimensions(dimensions);
     
     // Convert all dimensions to feet for calculation (with higher precision)
-    const lengthFt = standardizeDimensions(dimensions.length, dimensions.unit);
-    const widthFt = standardizeDimensions(dimensions.width, dimensions.unit);
-    const heightFt = standardizeDimensions(dimensions.height, dimensions.unit);
+    const lengthFt = standardizeDimensions(dimensions.length, dimensions.lengthWidthUnit);
+    const widthFt = standardizeDimensions(dimensions.width, dimensions.lengthWidthUnit);
+    const heightFt = standardizeDimensions(dimensions.height, dimensions.heightUnit);
     
     // Calculate volume in cubic feet - keep full precision during calculation
     const cubicFeet = lengthFt * widthFt * heightFt;
@@ -160,8 +162,8 @@ export function calculateCircularVolume(dimensions: CircularDimensions): VolumeR
     validateDimensions(dimensions);
     
     // Convert all dimensions to feet for calculation
-    const diameterFt = standardizeDimensions(dimensions.diameter, dimensions.unit);
-    const heightFt = standardizeDimensions(dimensions.height, dimensions.unit);
+    const diameterFt = standardizeDimensions(dimensions.diameter, dimensions.diameterUnit);
+    const heightFt = standardizeDimensions(dimensions.height, dimensions.heightUnit);
     
     // Calculate radius in feet
     const radiusFt = diameterFt / 2;

@@ -29,7 +29,8 @@ export const rectangularBeds: GardenBedDefinition[] = [
       length: 8,
       width: 4,
       height: 1,
-      unit: 'feet'
+      lengthWidthUnit: 'feet',
+      heightUnit: 'feet'
     },
     volumeCubicFeet: 32
   },
@@ -42,7 +43,8 @@ export const rectangularBeds: GardenBedDefinition[] = [
       length: 6,
       width: 4,
       height: 1,
-      unit: 'feet'
+      lengthWidthUnit: 'feet',
+      heightUnit: 'feet'
     },
     volumeCubicFeet: 24
   },
@@ -55,7 +57,8 @@ export const rectangularBeds: GardenBedDefinition[] = [
       length: 4,
       width: 4,
       height: 1,
-      unit: 'feet'
+      lengthWidthUnit: 'feet',
+      heightUnit: 'feet'
     },
     volumeCubicFeet: 16
   },
@@ -68,7 +71,8 @@ export const rectangularBeds: GardenBedDefinition[] = [
       length: 8,
       width: 2,
       height: 1,
-      unit: 'feet'
+      lengthWidthUnit: 'feet',
+      heightUnit: 'feet'
     },
     volumeCubicFeet: 16
   },
@@ -78,12 +82,13 @@ export const rectangularBeds: GardenBedDefinition[] = [
     type: 'rectangular',
     description: 'Birdies brand 83" x 43" x 15" raised garden bed',
     dimensions: {
-      length: 83,
-      width: 43,
+      length: 6.92, // 83 inches
+      width: 3.58,  // 43 inches
       height: 15,
-      unit: 'inches'
+      lengthWidthUnit: 'feet',
+      heightUnit: 'inches'
     },
-    volumeCubicFeet: 30.98
+    volumeCubicFeet: 30.98 // Recalculated: (83/12) * (43/12) * (15/12) = 30.98
   },
   {
     id: 'birdies-mid-rectangular',
@@ -91,12 +96,13 @@ export const rectangularBeds: GardenBedDefinition[] = [
     type: 'rectangular',
     description: 'Birdies brand 73" x 51" x 15" raised garden bed',
     dimensions: {
-      length: 73,
-      width: 51,
+      length: 6.08, // 73 inches
+      width: 4.25,  // 51 inches
       height: 15,
-      unit: 'inches'
+      lengthWidthUnit: 'feet',
+      heightUnit: 'inches'
     },
-    volumeCubicFeet: 32
+    volumeCubicFeet: 32.32 // Recalculated: (73/12) * (51/12) * (15/12) = 32.32
   },
   {
     id: 'birdies-square',
@@ -104,12 +110,13 @@ export const rectangularBeds: GardenBedDefinition[] = [
     type: 'rectangular',
     description: 'Birdies brand 51" x 51" x 15" raised garden bed',
     dimensions: {
-      length: 51,
-      width: 51,
+      length: 4.25, // 51 inches
+      width: 4.25,  // 51 inches
       height: 15,
-      unit: 'inches'
+      lengthWidthUnit: 'feet',
+      heightUnit: 'inches'
     },
-    volumeCubicFeet: 22.40
+    volumeCubicFeet: 22.58 // Recalculated: (51/12) * (51/12) * (15/12) = 22.58
   },
   {
     id: 'shallow-square',
@@ -119,10 +126,11 @@ export const rectangularBeds: GardenBedDefinition[] = [
     dimensions: {
       length: 4,
       width: 4,
-      height: 0.5,
-      unit: 'feet'
+      height: 6, // 0.5 feet
+      lengthWidthUnit: 'feet',
+      heightUnit: 'inches'
     },
-    volumeCubicFeet: 8
+    volumeCubicFeet: 8.00 // Recalculated: 4 * 4 * (6/12) = 8.00
   },
   {
     id: 'compact-square',
@@ -133,7 +141,8 @@ export const rectangularBeds: GardenBedDefinition[] = [
       length: 3,
       width: 3,
       height: 1,
-      unit: 'feet'
+      lengthWidthUnit: 'feet',
+      heightUnit: 'feet'
     },
     volumeCubicFeet: 9
   },
@@ -146,7 +155,8 @@ export const rectangularBeds: GardenBedDefinition[] = [
       length: 5,
       width: 5,
       height: 1,
-      unit: 'feet'
+      lengthWidthUnit: 'feet',
+      heightUnit: 'feet'
     },
     volumeCubicFeet: 25
   },
@@ -158,10 +168,11 @@ export const rectangularBeds: GardenBedDefinition[] = [
     dimensions: {
       length: 4,
       width: 4,
-      height: 2,
-      unit: 'feet'
+      height: 24, // 2 feet
+      lengthWidthUnit: 'feet',
+      heightUnit: 'inches'
     },
-    volumeCubicFeet: 32
+    volumeCubicFeet: 32.00 // Recalculated: 4 * 4 * (24/12) = 32.00
   },
   {
     id: 'birdies-medium-tall',
@@ -169,12 +180,13 @@ export const rectangularBeds: GardenBedDefinition[] = [
     type: 'rectangular',
     description: 'Birdies brand 5\' x 3\' x 29" raised garden bed',
     dimensions: {
-      length: 5,
-      width: 3,
+      length: 5, // Already in feet
+      width: 3,  // Already in feet
       height: 29,
-      unit: 'inches'
+      lengthWidthUnit: 'feet',
+      heightUnit: 'inches'
     },
-    volumeCubicFeet: 36.25
+    volumeCubicFeet: 36.25 // Recalculated: 5 * 3 * (29/12) = 36.25
   },
   {
     id: 'long-thin',
@@ -185,7 +197,8 @@ export const rectangularBeds: GardenBedDefinition[] = [
       length: 6,
       width: 2,
       height: 1,
-      unit: 'feet'
+      lengthWidthUnit: 'feet',
+      heightUnit: 'feet'
     },
     volumeCubicFeet: 12
   },
@@ -198,7 +211,8 @@ export const rectangularBeds: GardenBedDefinition[] = [
       length: 6,
       width: 3,
       height: 1,
-      unit: 'feet'
+      lengthWidthUnit: 'feet',
+      heightUnit: 'feet'
     },
     volumeCubicFeet: 18
   },
@@ -211,7 +225,8 @@ export const rectangularBeds: GardenBedDefinition[] = [
       length: 10,
       width: 4,
       height: 1,
-      unit: 'feet'
+      lengthWidthUnit: 'feet',
+      heightUnit: 'feet'
     },
     volumeCubicFeet: 40
   },
@@ -224,7 +239,8 @@ export const rectangularBeds: GardenBedDefinition[] = [
       length: 6,
       width: 2,
       height: 1,
-      unit: 'feet'
+      lengthWidthUnit: 'feet',
+      heightUnit: 'feet'
     },
     volumeCubicFeet: 12
   },
@@ -234,12 +250,13 @@ export const rectangularBeds: GardenBedDefinition[] = [
     type: 'rectangular',
     description: 'Birdies brand 102" x 24" x 15" raised garden bed',
     dimensions: {
-      length: 102,
-      width: 24,
+      length: 8.5, // 102 inches
+      width: 2,   // 24 inches
       height: 15,
-      unit: 'inches'
+      lengthWidthUnit: 'feet',
+      heightUnit: 'inches'
     },
-    volumeCubicFeet: 21.25
+    volumeCubicFeet: 21.25 // Recalculated: 8.5 * 2 * (15/12) = 21.25
   },
   {
     id: 'birdies-narrow-medium',
@@ -247,12 +264,13 @@ export const rectangularBeds: GardenBedDefinition[] = [
     type: 'rectangular',
     description: 'Birdies brand 65" x 24" x 15" raised garden bed',
     dimensions: {
-      length: 65,
-      width: 24,
+      length: 5.42, // 65 inches
+      width: 2,   // 24 inches
       height: 15,
-      unit: 'inches'
+      lengthWidthUnit: 'feet',
+      heightUnit: 'inches'
     },
-    volumeCubicFeet: 13.50
+    volumeCubicFeet: 13.54 // Recalculated: (65/12) * 2 * (15/12) = 13.54
   },
   {
     id: 'birdies-large-tall',
@@ -260,12 +278,13 @@ export const rectangularBeds: GardenBedDefinition[] = [
     type: 'rectangular',
     description: 'Large Birdies brand 6\' x 6\' x 30" raised garden bed',
     dimensions: {
-      length: 6,
-      width: 6,
+      length: 6, // Already in feet
+      width: 6,  // Already in feet
       height: 30,
-      unit: 'inches'
+      lengthWidthUnit: 'feet',
+      heightUnit: 'inches'
     },
-    volumeCubicFeet: 90
+    volumeCubicFeet: 90.00 // Recalculated: 6 * 6 * (30/12) = 90.00
   },
   {
     id: 'patio-narrow',
@@ -276,7 +295,8 @@ export const rectangularBeds: GardenBedDefinition[] = [
       length: 8,
       width: 2,
       height: 1,
-      unit: 'feet'
+      lengthWidthUnit: 'feet',
+      heightUnit: 'feet'
     },
     volumeCubicFeet: 16
   }
@@ -292,11 +312,12 @@ export const circularBeds: GardenBedDefinition[] = [
     type: 'circular',
     description: 'Small 36" diameter circular raised bed',
     dimensions: {
-      diameter: 36,
+      diameter: 3, // 36 inches
       height: 12,
-      unit: 'inches'
+      diameterUnit: 'feet',
+      heightUnit: 'inches'
     },
-    volumeCubicFeet: 7.07
+    volumeCubicFeet: 7.07 // Recalculated: PI * (3/2)^2 * (12/12) = 7.07
   },
   {
     id: 'birdies-round-small',
@@ -304,11 +325,12 @@ export const circularBeds: GardenBedDefinition[] = [
     type: 'circular',
     description: 'Birdies brand 38" diameter x 15" tall raised bed',
     dimensions: {
-      diameter: 38,
+      diameter: 3.17, // 38 inches
       height: 15,
-      unit: 'inches'
+      diameterUnit: 'feet',
+      heightUnit: 'inches'
     },
-    volumeCubicFeet: 9.85
+    volumeCubicFeet: 9.85 // Recalculated: PI * ((38/12)/2)^2 * (15/12) = 9.85
   },
   {
     id: 'round-medium',
@@ -316,11 +338,12 @@ export const circularBeds: GardenBedDefinition[] = [
     type: 'circular',
     description: 'Medium 48" diameter circular raised bed',
     dimensions: {
-      diameter: 48,
+      diameter: 4, // 48 inches
       height: 12,
-      unit: 'inches'
+      diameterUnit: 'feet',
+      heightUnit: 'inches'
     },
-    volumeCubicFeet: 12.57
+    volumeCubicFeet: 12.57 // Recalculated: PI * (4/2)^2 * (12/12) = 12.57
   }
 ];
 

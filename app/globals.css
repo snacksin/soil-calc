@@ -3,9 +3,11 @@
 
 /* Base styles */
 body {
-  background: linear-gradient(135deg, rgba(255, 122, 89, 0.1), rgba(102, 51, 153, 0.1));
-  color: #333333;
-  font-family: 'Roboto', sans-serif;
+  /* Updated gradient using CSS variables */
+  /* Gradient using dedicated variables for subtle white/black effect */
+  background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+  color: var(--color-foreground);
+  font-family: 'Roboto', sans-serif; /* Revert font back to Roboto for body */
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -29,19 +31,20 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Glassmorphism Components */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--glass-background);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid var(--glass-border);
   border-radius: 16px;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   padding: 24px;
   transition: all 0.3s ease;
+  color: var(--color-foreground); /* Ensure text color contrasts */
 }
 
 .glass-panel:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: scale(1.02);
+  /* Slightly more opaque version of glass background */
+  background: var(--glass-background-hover);
 }
 
 /* Bento Box Layout */
@@ -101,15 +104,15 @@ h1, h2, h3, h4, h5, h6 {
 /* Components */
 .header,
 .footer {
-  background-color: #663399;
-  color: #ffffff;
+  background-color: var(--color-primary);
+  color: var(--color-background); /* Use background for contrast on primary */
   padding-top: 1.5rem;
   padding-bottom: 1.5rem;
 }
 
 .btn {
-  background-color: #FF7A59;
-  color: #ffffff;
+  background-color: var(--color-accent); /* Bright Orange */
+  color: var(--color-background); /* Use background for contrast on accent */
   padding-left: 1.5rem;
   padding-right: 1.5rem;
   padding-top: 0.75rem;
@@ -126,22 +129,85 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn:hover {
-  background-color: #e86c4d;
+  background-color: var(--color-accent-hover); /* Bold Ember */
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(255, 122, 89, 0.4);
+  box-shadow: 0 5px 15px var(--color-accent-shadow);
 }
 
 .btn-secondary {
-  background-color: #663399;
+  background-color: var(--color-secondary); /* Vibrant Grass Green */
+  /* Text color already set by .btn */
 }
 
 .btn-secondary:hover {
-  background-color: #552b80;
-  box-shadow: 0 5px 15px rgba(102, 51, 153, 0.4);
+  background-color: var(--color-secondary-hover); /* Moss Glow */
+  box-shadow: 0 5px 15px var(--color-secondary-shadow);
 }
 
+/* Active state for toggle buttons like shape selector */
+.btn-active {
+  background-color: var(--color-primary); /* Default active: Primary color */
+  color: var(--color-background); /* Default active: Background color for contrast */
+  /* Ensure hover doesn't override active state visually if desired */
+  /* Example: Keep transform but maybe not shadow */
+}
+
+.btn-active:hover {
+  background-color: var(--color-primary); /* Keep active background on hover */
+  transform: translateY(-1px); /* Slightly less lift than normal hover */
+  box-shadow: 0 3px 10px var(--color-primary-shadow); /* Maybe a smaller shadow */
+}
+
+/* Form Input Glassmorphism Styles */
+.form-input-glass {
+  padding: 10px;
+  border-radius: 8px;
+  border: 2px solid var(--color-primary-border);
+  background: var(--glass-background);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  color: var(--color-foreground); /* Use foreground color */
+  box-shadow: 0 0 10px var(--color-primary-shadow);
+  font-weight: 500;
+  width: 100%; /* Default to full width */
+  box-sizing: border-box; /* Include padding and border in element's total width and height */
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Ensure consistent appearance for select dropdown arrows */
+.form-input-glass select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  /* Updated SVG fill color using CSS variable - Note: Direct var() usage in url() might not work, needs JS or different approach if issues arise */
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%233D2B1F' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>"); /* Fallback: Hardcoded light foreground */
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px; /* Make space for the arrow */
+}
+
+.form-input-glass:focus, .form-input-glass select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 15px var(--color-primary-shadow-focus);
+}
+
+/* Modifier for left part of joined input/select */
+.form-input-glass-left {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* Modifier for right part of joined input/select */
+.form-input-glass-right {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-left: none; /* Remove double border */
+}
+
+
 .accent-text {
-  color: #FFDAB9;
+  color: var(--color-accent); /* Bright Orange */
 }
 
 /* Utilities */
@@ -162,39 +228,139 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Text on glass background needs better contrast */
 .glass-text {
-  background-color: rgba(0, 0, 0, 0.4);
+  /* Adjust background for better contrast if needed, using variables */
+  background-color: var(--glass-text-background);
   padding: 4px 8px;
   border-radius: 4px;
-  color: #fff;
+  color: var(--glass-text-foreground);
 }
 
 /* Custom CSS Variables */
 :root {
-  --color-primary: #FF7A59;    /* Vibrant orange */
-  --color-secondary: #663399;  /* Deep purple */
-  --color-accent: #FFDAB9;     /* Soft peach */
-  --color-background: #FFFFFF; /* White */
-  --color-foreground: #333333; /* Dark Gray */
-  --glass-border: rgba(255, 255, 255, 0.3);
-  --glass-background: rgba(255, 255, 255, 0.2);
+  /* Light Mode Palette */
+  --color-primary: #046830;           /* Deep Garden Green */
+  --color-secondary: #79C000;         /* Vibrant Grass Green */
+  --color-accent: #FF6E29;            /* Bright Orange */
+  --color-accent-hover: #FF8243;      /* Bold Ember */
+  --color-secondary-hover: #66B032;   /* Moss Glow */
+  --color-background: #F7F4EA;        /* Creamy Off-White */
+  --color-foreground: #3D2B1F;        /* Dark Sienna (for text) */
+  --color-neutral-light: #A9CF54;     /* Light Citrus Green */
+  --color-neutral-medium: #8B572A;    /* Earth Brown */
+  --color-neutral-dark: #5A3922;      /* Rich Soil Brown */
+  --color-info: #56BFEA;              /* Sky Blue */
+
+  /* Background Gradient */
+  --gradient-start: #FFFFFF;          /* White */
+  --gradient-end: #F7F4EA;            /* Creamy Off-White (Reverted) */
+
+  --glass-border: rgba(4, 104, 48, 0.3);  /* Primary with alpha */
+  --glass-background: rgba(247, 244, 234, 0.2); /* Background with alpha */
+  --glass-background-hover: rgba(247, 244, 234, 0.5); /* More opaque background */
   --glass-blur: blur(10px);
+
+  /* Derived Colors */
+  --color-primary-border: rgba(4, 104, 48, 0.5);
+  --color-primary-shadow: rgba(4, 104, 48, 0.2);
+  --color-primary-shadow-focus: rgba(4, 104, 48, 0.4);
+  --color-accent-shadow: rgba(255, 110, 41, 0.4);
+  --color-secondary-shadow: rgba(121, 192, 0, 0.4);
+
+  /* Text on Glass */
+  --glass-text-background: rgba(61, 43, 31, 0.7); /* Dark Sienna alpha */
+  --glass-text-foreground: #F7F4EA; /* Creamy Off-White */
 }
 
 /* Dark theme variables */
 .dark {
-  --color-primary: #FF8C6A;    /* Lighter Orange */
-  --color-secondary: #7B42B6;  /* Lighter Purple */
-  --color-accent: #FFE4C9;     /* Lighter Peach */
-  --color-background: #1A1A1A; /* Dark Gray */
-  --color-foreground: #F5F5F5; /* Light Gray */
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-background: rgba(255, 255, 255, 0.1);
+  /* Dark Mode Palette */
+  --color-primary: var(--color-foreground); /* Use foreground for max contrast */
+  --color-secondary: var(--color-foreground); /* Use foreground for max contrast */
+  --color-accent: #B6E64D;            /* Neon Lime */
+  --color-accent-hover: #FF8243;      /* Bold Ember (Using light mode CTA for pop) */
+  --color-secondary-hover: #A9CF54;   /* Light Citrus Green */
+  --color-background: #0B1E13;        /* Midnight Garden */
+  --color-foreground: #F2F2F2;        /* Soft White */
+  --color-neutral-light: #A8C3B1;     /* Sage Gray */
+  --color-neutral-medium: #5A3922;    /* Rich Soil Brown */
+  --color-neutral-dark: #3D2B1F;      /* Dark Sienna */
+  --color-info: #56BFEA;              /* Sky Blue */
+
+  /* Background Gradient */
+  --gradient-start: #0F4D31;          /* Deep Forest (Reverted) */
+  --gradient-end: #000000;            /* Black */
+
+  --glass-border: rgba(242, 242, 242, 0.1); /* Foreground with alpha */
+  --glass-background: rgba(242, 242, 242, 0.1); /* Foreground with alpha */
+  --glass-background-hover: var(--glass-background); /* Match non-hover background */
+
+  /* Derived Colors */
+  --color-primary-border: rgba(15, 77, 49, 0.5);
+  --color-primary-shadow: rgba(15, 77, 49, 0.2);
+  --color-primary-shadow-focus: rgba(15, 77, 49, 0.4);
+  --color-accent-shadow: rgba(182, 230, 77, 0.4);
+  --color-secondary-shadow: rgba(102, 176, 50, 0.4);
+
+  /* Text on Glass */
+  --glass-text-background: rgba(11, 30, 19, 0.7); /* Midnight Garden alpha */
+  --glass-text-foreground: #F2F2F2; /* Soft White */
+
+  /* Update dropdown arrow color for dark mode */
+  /* This still might require JS to update dynamically based on theme */
+  /* .form-input-glass select {
+    background-image: url("data:image/svg+xml;utf8,<svg fill='%23F2F2F2' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+  } */
+}
+
+/* Explicitly set button text color in dark mode for contrast */
+.dark .btn {
+  color: #FFFFFF; /* White text on dark buttons */
+}
+
+/* Dark mode style for active buttons */
+.dark .btn-active {
+  background-color: var(--color-accent-hover); /* Orange */
+  color: #000000; /* Black text */
+}
+
+.dark .btn-active:hover {
+  background-color: var(--color-accent-hover); /* Keep orange on hover */
+  /* Keep transform/shadow from default .btn-active:hover or customize */
+}
+
+
+/* Dark mode style for secondary (inactive) buttons */
+.dark .btn-secondary {
+  background-color: rgba(102, 51, 153, 0.7); /* Restore purple */
+}
+/* Dark mode style for secondary (inactive) buttons */
+.dark .btn-secondary {
+  background-color: rgba(102, 51, 153, 0.7); /* Restore purple */
+}
+
+/* Disable background change on glass panel hover in dark mode */
+.dark .glass-panel:hover {
+  background: var(--glass-background); /* Reset to non-hover background */
 }
 
 /* Additional utility classes */
 .antialiased {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+
+/* Utility class for button icon layout */
+.btn-icon-layout {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+/* Utility class for button icon layout */
+.btn-icon-layout {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* Content spacing */

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { allGardenBeds, GardenBedDefinition, rectangularBeds, circularBeds } from '../data/garden-beds'
 import { RectangleIcon, CircleIcon } from './Icons'
-import { calculateRectangularVolume, calculateCircularVolume, Dimensions, CircularDimensions, VolumeResult, formatVolumeResult, VolumeUnit } from '../lib/calculations'
+import { calculateRectangularVolume, calculateCircularVolume, Dimensions, CircularDimensions, VolumeResult, formatVolumeResult, VolumeUnit, DimensionUnit } from '../lib/calculations' // Moved DimensionUnit import here
 import VolumeResultDisplay from './VolumeResultDisplay'
 import BagCalculator from './BagCalculator'
 
@@ -26,7 +26,7 @@ export default function GardenBedSelector() {
   const [totalVolumeResult, setTotalVolumeResult] = useState<VolumeResult | null>(null)
   const [displayUnit, setDisplayUnit] = useState<VolumeUnit>('cubic_feet')
   const [fillFactor, setFillFactor] = useState<number>(1);
-  
+
   function applyFillFactor(volume: VolumeResult, factor: number): VolumeResult {
     return {
       cubicFeet: Number((volume.cubicFeet * factor).toFixed(2)),
@@ -37,40 +37,30 @@ export default function GardenBedSelector() {
       displayUnit: volume.displayUnit
     };
   }
-function convertToFeet(value: number, unit: string): number {
-switch(unit) {
-case 'feet':
- return value;
-case 'inches':
- return value / 12;
-case 'cm':
- return value * 0.0328084;
-case 'meters':
- return value * 3.28084;
-default:
- return value;
-}
-}
+  // Removed convertToFeet helper function as standardization is now handled within calculation functions
+
   // Update total volume when selected beds change
   useEffect(() => {
     try {
       setCalculationError(null);
-      
+
       if (selectedBeds.length > 0) {
         // Calculate total cubic feet with each bed's saved fill factor
         const totalCubicFeet = selectedBeds.reduce(
           (sum, entry) => {
             if (!entry.volumeResult) return sum;
             // Use each bed's saved fill factor instead of the global one
+            // Note: applyFillFactor uses the volumeResult which should be correct based on initial calculation
             return sum + applyFillFactor(entry.volumeResult, entry.savedFillFactor).cubicFeet;
           },
           0
         );
-        
-        if (isNaN(totalCubicFeet) || totalCubicFeet <= 0) {
+
+        if (isNaN(totalCubicFeet) || totalCubicFeet < 0) { // Allow zero volume
           console.warn('Total volume calculation resulted in invalid value:', totalCubicFeet);
+          // Don't throw error, just maybe show 0
         }
-        
+
         // Create a new volume result with total values using precise conversion factors
         const newTotalVolume: VolumeResult = {
           cubicFeet: Number(totalCubicFeet.toFixed(2)),
@@ -80,7 +70,7 @@ default:
           gallons: Number((totalCubicFeet * 7.48052).toFixed(2)),
           displayUnit: displayUnit
         };
-        
+
         setTotalVolumeResult(newTotalVolume);
         console.log('Total volume updated:', newTotalVolume);
       } else {
@@ -92,102 +82,130 @@ default:
     }
   }, [selectedBeds, displayUnit]); // Removed fillFactor dependency since we use each bed's savedFillFactor
 
-  // Custom dimensions state
+  // Custom dimensions state - Ensure units match DimensionUnit type
   const [customRectangular, setCustomRectangular] = useState({
     length: 4,
-    lengthUnit: 'feet',
+    lengthUnit: 'feet' as DimensionUnit,
     width: 4,
-    widthUnit: 'feet',
-    height: 1,
-    heightUnit: 'feet'
-  })
-  
-  const [customCircular, setCustomCircular] = useState({
-    diameter: 4,
-    height: 1,
-    diameterUnit: 'feet' as 'inches' | 'feet' | 'cm' | 'meters',
-    heightUnit: 'feet' as 'inches' | 'feet' | 'cm' | 'meters'
+    widthUnit: 'feet' as DimensionUnit,
+    height: 12, // Default height to 12 inches
+    heightUnit: 'inches' as DimensionUnit
   })
 
-  // Helper function to render bed dimensions for dropdown (with height always in inches)
+  const [customCircular, setCustomCircular] = useState({
+    diameter: 4,
+    height: 12, // Default height to 12 inches
+    diameterUnit: 'feet' as DimensionUnit,
+    heightUnit: 'inches' as DimensionUnit
+  })
+
+  // Helper function to render bed dimensions for dropdown
   function renderBedDimensions(bed: GardenBedDefinition): string {
     const dimensions = bed.dimensions;
-    const unit = dimensions.unit === 'feet' ? "ft" : "in";
-    if (bed.type === 'rectangular' && 'length' in dimensions) {
-      return `${dimensions.length}${unit} × ${dimensions.width}${unit} × ${dimensions.height}${unit}`;
-    } else if (bed.type === 'circular' && 'diameter' in dimensions) {
-      return `${dimensions.diameter}${unit} diameter × ${dimensions.height}${unit}`;
+    const getUnitSymbol = (unit: DimensionUnit | string): string => { // Accept string for safety
+      switch(unit) {
+        case 'feet': return 'ft';
+        case 'inches': return 'in';
+        case 'cm': return 'cm';
+        case 'meters': return 'm';
+        default: return '';
+      }
+    };
+
+    if (bed.type === 'rectangular' && 'lengthWidthUnit' in dimensions) {
+      const lwUnit = getUnitSymbol(dimensions.lengthWidthUnit);
+      const hUnit = getUnitSymbol(dimensions.heightUnit);
+      // Ensure values are numbers before calling toFixed if needed, or just display them
+      const lengthStr = typeof dimensions.length === 'number' ? dimensions.length : '';
+      const widthStr = typeof dimensions.width === 'number' ? dimensions.width : '';
+      const heightStr = typeof dimensions.height === 'number' ? dimensions.height : '';
+      return `${lengthStr}${lwUnit} × ${widthStr}${lwUnit} × ${heightStr}${hUnit}`;
+    } else if (bed.type === 'circular' && 'diameterUnit' in dimensions) {
+      const dUnit = getUnitSymbol(dimensions.diameterUnit);
+      const hUnit = getUnitSymbol(dimensions.heightUnit);
+      const diameterStr = typeof dimensions.diameter === 'number' ? dimensions.diameter : '';
+      const heightStr = typeof dimensions.height === 'number' ? dimensions.height : '';
+      return `${diameterStr}${dUnit} diameter × ${heightStr}${hUnit}`;
     }
     return "";
   }
-  
+
+
   // Handle bed selection change with error handling
   const handleBedSelectionChange = (bedId: string) => {
     setSelectedBedId(bedId);
     setCalculationError(null); // Clear previous errors
-    
+
     try {
       const bed = allGardenBeds.find(b => b.id === bedId);
       if (!bed) {
         throw new Error('Selected bed not found');
       }
-      
+
       let result: VolumeResult;
-      
-      if (bed.type === 'rectangular' && 'length' in bed.dimensions) {
+
+      // Use the updated calculation functions which now handle the new dimension structure
+      if (bed.type === 'rectangular' && 'lengthWidthUnit' in bed.dimensions) {
         console.log('Calculating volume for rectangular bed:', bed.dimensions);
         result = calculateRectangularVolume(bed.dimensions as Dimensions);
-      } else if (bed.type === 'circular' && 'diameter' in bed.dimensions) {
+      } else if (bed.type === 'circular' && 'diameterUnit' in bed.dimensions) {
         console.log('Calculating volume for circular bed:', bed.dimensions);
         result = calculateCircularVolume(bed.dimensions as CircularDimensions);
       } else {
-        throw new Error('Invalid bed dimensions or type');
+        // This case should ideally not happen if data is correct
+        console.error("Inconsistent dimensions object for bed:", bed);
+        throw new Error('Invalid bed dimensions structure');
       }
-      
+
       setVolumeResult(result);
-      
+
     } catch (error) {
       // Handle calculation errors
       const errorMessage = error instanceof Error ? error.message : 'Unknown calculation error';
       console.error('Bed selection calculation error:', errorMessage);
       setCalculationError(errorMessage);
-      
+
       // Provide fallback behavior - empty result
       setVolumeResult(null);
     }
   }
-  
+
   // Add the selected bed to the list with error handling
   const addSelectedBed = () => {
     try {
       setCalculationError(null);
-      
+
       const bed = allGardenBeds.find(b => b.id === selectedBedId);
       if (!bed) {
         throw new Error('Selected bed not found');
       }
-      
+
       if (!volumeResult) {
-        throw new Error('Please calculate volume before adding bed');
+        // Recalculate if volumeResult is null for some reason, or throw error
+         handleBedSelectionChange(selectedBedId); // Try recalculating
+         if (!volumeResult) { // Check again after recalculation attempt
+            throw new Error('Please calculate volume before adding bed');
+         }
       }
-      
+
       // Allow duplicate bed entries by generating a unique id for each addition
+      // The 'bed' object already has the correct new dimension structure from garden-beds.ts
       setSelectedBeds([...selectedBeds, {
         id: selectedBedId + '-' + Date.now(),
-        bed,
-        volumeResult,
+        bed, // This 'bed' object uses the new structure
+        volumeResult, // Use the calculated volume
         savedFillFactor: fillFactor // Store the current fill factor with this bed
       }]);
-      
+
       console.log('Bed added successfully:', bed.name);
-      
+
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error adding bed';
       console.error('Error adding bed:', errorMessage);
       setCalculationError(errorMessage);
     }
   }
-  
+
   // Remove a bed from the list
   const removeBed = (bedId: string) => {
     try {
@@ -198,19 +216,23 @@ default:
       // Don't set UI error as this is less critical
     }
   }
-  
+
   // Add a custom bed to the list with error handling
   const addCustomBed = () => {
     try {
       setCalculationError(null);
-      
+
       if (!volumeResult) {
-        throw new Error('Please calculate volume before adding custom bed');
+         // Recalculate if volumeResult is null
+         calculateCustomVolume();
+         if (!volumeResult) { // Check again
+            throw new Error('Please calculate volume before adding custom bed');
+         }
       }
-      
+
       // Create a unique id for the custom bed
       const customId = `custom-${Date.now()}`;
-      
+
       // Ensure dimensions are valid
       if (customShapeType === 'rectangular') {
         if (customRectangular.length <= 0 || customRectangular.width <= 0 || customRectangular.height <= 0) {
@@ -221,146 +243,155 @@ default:
           throw new Error('All dimensions must be positive numbers');
         }
       }
-      
-      // Create a custom bed definition
+
+      // Create a custom bed definition preserving original units from state
       const customBed: GardenBedDefinition = {
         id: customId,
         name: customShapeType === 'rectangular'
           ? `Custom Rectangular (L: ${customRectangular.length} ${customRectangular.lengthUnit}, W: ${customRectangular.width} ${customRectangular.widthUnit}, H: ${customRectangular.height} ${customRectangular.heightUnit})`
           : `Custom Circular (${customCircular.diameter} ${customCircular.diameterUnit} diameter × ${customCircular.height} ${customCircular.heightUnit} height)`,
-          type: customShapeType,
-          dimensions: customShapeType === 'rectangular'
-            ? {
-                length: convertToFeet(customRectangular.length, customRectangular.lengthUnit),
-                width: convertToFeet(customRectangular.width, customRectangular.widthUnit),
-                height: convertToFeet(customRectangular.height, customRectangular.heightUnit),
-                unit: 'feet'
-              }
-            : {
-                diameter: convertToFeet(customCircular.diameter, customCircular.diameterUnit),
-                height: convertToFeet(customCircular.height, customCircular.heightUnit),
-                unit: 'feet'
-              }
+        type: customShapeType,
+        dimensions: customShapeType === 'rectangular'
+          ? {
+              length: customRectangular.length,
+              width: customRectangular.width,
+              height: customRectangular.height,
+              lengthWidthUnit: customRectangular.lengthUnit, // Use unit from state
+              heightUnit: customRectangular.heightUnit      // Use unit from state
+            }
+          : {
+              diameter: customCircular.diameter,
+              height: customCircular.height,
+              diameterUnit: customCircular.diameterUnit,   // Use unit from state
+              heightUnit: customCircular.heightUnit        // Use unit from state
+            }
       };
-      
+
       setSelectedBeds([...selectedBeds, {
         id: customId,
-        bed: customBed,
-        volumeResult,
+        bed: customBed, // Store the bed definition with original units
+        volumeResult, // Use the calculated volume
         savedFillFactor: fillFactor // Store the current fill factor with this bed
       }]);
-      
+
       console.log('Custom bed added successfully:', customBed.name);
-      
+
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Error adding custom bed';
       console.error('Error adding custom bed:', errorMessage);
       setCalculationError(errorMessage);
     }
   }
-  
+
   // State for calculation errors
   const [calculationError, setCalculationError] = useState<string | null>(null);
 
   // Handle custom calculations with error handling
   const calculateCustomVolume = () => {
     setCalculationError(null); // Clear previous errors
-    
+
     try {
       let result: VolumeResult;
-      
+      let dims: Dimensions | CircularDimensions;
+
       if (customShapeType === 'rectangular') {
-        // Log dimensions for debugging
-        console.log('Calculating volume for rectangular bed:', customRectangular);
-        result = calculateRectangularVolume({
-          length: convertToFeet(customRectangular.length, customRectangular.lengthUnit),
-          width: convertToFeet(customRectangular.width, customRectangular.widthUnit),
-          height: convertToFeet(customRectangular.height, customRectangular.heightUnit),
-          unit: 'feet'
-        });
+         // Prepare dimensions object directly from state
+         dims = {
+           length: customRectangular.length,
+           width: customRectangular.width,
+           height: customRectangular.height,
+           lengthWidthUnit: customRectangular.lengthUnit,
+           heightUnit: customRectangular.heightUnit
+         };
+         console.log('Calculating volume for rectangular bed:', dims);
+         result = calculateRectangularVolume(dims);
       } else if (customShapeType === 'circular') {
-        // Log dimensions for debugging
-        const circularCalc = {
-          diameter: convertToFeet(customCircular.diameter, customCircular.diameterUnit),
-          height: convertToFeet(customCircular.height, customCircular.heightUnit),
-          unit: 'feet' as 'feet' | 'inches' | 'cm' | 'meters'
-        };
-        console.log('Calculating volume for circular bed:', circularCalc);
-        result = calculateCircularVolume(circularCalc);
+         // Prepare dimensions object directly from state
+         dims = {
+            diameter: customCircular.diameter,
+            height: customCircular.height,
+            diameterUnit: customCircular.diameterUnit,
+            heightUnit: customCircular.heightUnit
+         };
+         console.log('Calculating volume for circular bed:', dims);
+         result = calculateCircularVolume(dims);
       } else {
         setCalculationError('Invalid shape type selected');
         return;
       }
-      
+
       // Set the result in state
       setVolumeResult(result);
-      
+
     } catch (error) {
       // Handle calculation errors
       const errorMessage = error instanceof Error ? error.message : 'Unknown calculation error';
       console.error('Calculation error:', errorMessage);
       setCalculationError(errorMessage);
-      
+
       // Provide fallback behavior - empty result
       setVolumeResult(null);
     }
   }
-  
-  // Automatically recalculate volume when custom dimensions change
+
+  // Automatically recalculate volume when custom dimensions or shape type change
   useEffect(() => {
     if (activeTab === 'custom') {
       calculateCustomVolume();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customRectangular, customCircular, customShapeType, activeTab]);
-  
+
+  // Recalculate volume for the selected predefined bed when the component mounts or tab changes
+  useEffect(() => {
+    if (activeTab === 'rectangular' || activeTab === 'circular') {
+      // Ensure a valid bed ID is selected, default if necessary
+      const currentBedList = activeTab === 'rectangular' ? rectangularBeds : circularBeds;
+      const isValidSelection = currentBedList.some(b => b.id === selectedBedId);
+      const bedIdToCalculate = isValidSelection ? selectedBedId : (currentBedList[0]?.id || '');
+      if (bedIdToCalculate) {
+         setSelectedBedId(bedIdToCalculate); // Update state if defaulted
+         handleBedSelectionChange(bedIdToCalculate);
+      } else {
+         setVolumeResult(null); // No valid beds in the list
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]); // Add selectedBedId dependency? No, handleBedSelectionChange covers it.
+
+
+  // --- JSX Rendering ---
   return (
     <div className="content-section">
       <h2 style={{ color: 'var(--color-secondary)', marginBottom: '1.5rem', textAlign: 'center' }}>Garden Bed Soil Calculator</h2>
-      
+
       {/* Shape Type Tabs */}
       <div style={{ display: 'flex', gap: '10px', marginBottom: '1.5rem', justifyContent: 'center' }}>
         <button
-          className={`btn ${activeTab === 'rectangular' ? '' : 'btn-secondary'}`}
+          className={`btn btn-icon-layout ${activeTab === 'rectangular' ? 'btn-active' : 'btn-secondary'}`} // Added btn-icon-layout
           onClick={() => setActiveTab('rectangular')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            background: activeTab === 'rectangular' ? 'var(--color-primary)' : 'rgba(102, 51, 153, 0.7)'
-          }}
+          // style prop removed
         >
-          <div>
-            <RectangleIcon />
-          </div>
+          <RectangleIcon /> {/* Simplified structure */}
           Rectangular
         </button>
         <button
-          className={`btn ${activeTab === 'circular' ? '' : 'btn-secondary'}`}
+          className={`btn btn-icon-layout ${activeTab === 'circular' ? 'btn-active' : 'btn-secondary'}`} // Added btn-icon-layout
           onClick={() => setActiveTab('circular')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            background: activeTab === 'circular' ? 'var(--color-primary)' : 'rgba(102, 51, 153, 0.7)'
-          }}
+          // style prop removed
         >
-          <div>
-            <CircleIcon />
-          </div>
+          <CircleIcon /> {/* Simplified structure */}
           Circular
         </button>
         <button
-          className={`btn ${activeTab === 'custom' ? '' : 'btn-secondary'}`}
+          className={`btn ${activeTab === 'custom' ? 'btn-active' : 'btn-secondary'}`}
           onClick={() => setActiveTab('custom')}
-          style={{
-            background: activeTab === 'custom' ? 'var(--color-primary)' : 'rgba(102, 51, 153, 0.7)'
-          }}
+          // style prop removed
         >
           Custom
         </button>
       </div>
-      
+
       {/* Error Message Display */}
       {calculationError && (
         <div className="glass-panel" style={{
@@ -381,7 +412,7 @@ default:
           </div>
         </div>
       )}
-      
+
       {/* Bed Selection - Dropdown with Add Button */}
       {(activeTab === 'rectangular' || activeTab === 'circular') && (
         <div className="glass-panel" style={{ marginBottom: '1.5rem', padding: '24px' }}>
@@ -391,24 +422,15 @@ default:
                 Select a garden bed
               </label>
               <select
-                style={{
-                  width: '100%',
-                  padding: '10px',
-                  borderRadius: '8px',
-                  border: '2px solid rgba(255, 122, 89, 0.5)',
-                  background: 'rgba(255, 255, 255, 0.25)',
-                  backdropFilter: 'blur(5px)',
-                  color: 'inherit',
-                  boxShadow: '0 0 10px rgba(255, 122, 89, 0.2)',
-                  fontWeight: '500'
-                }}
                 value={selectedBedId}
                 onChange={(e) => handleBedSelectionChange(e.target.value)}
+                className="form-input-glass" // Apply the new class
               >
                 {(activeTab === 'rectangular' ? rectangularBeds : circularBeds).map((bed) => (
                   <option
                     key={bed.id}
                     value={bed.id}
+                    // Use updated renderBedDimensions
                     title={`${bed.name} - ${renderBedDimensions(bed)}`}
                   >
                     {bed.name} - {renderBedDimensions(bed)}
@@ -417,15 +439,16 @@ default:
               </select>
             </div>
           </div>
-          
+
           {/* Preview of selected bed with volume calculation display */}
-          {volumeResult && (
+          {volumeResult && allGardenBeds.find(b => b.id === selectedBedId) && ( // Ensure bed exists
             <div>
               <div className="glass-panel" style={{ marginTop: '20px', padding: '20px', border: '1px solid var(--glass-border)' }}>
                 <h4 style={{ color: 'var(--color-primary)', marginBottom: '8px' }}>
                   {allGardenBeds.find(b => b.id === selectedBedId)?.name}
                 </h4>
                 <div style={{ fontSize: '0.9rem', marginBottom: '16px', opacity: 0.8 }}>
+                  {/* Use updated renderBedDimensions */}
                   {renderBedDimensions(allGardenBeds.find(b => b.id === selectedBedId)!)}
                 </div>
                 <div>
@@ -435,17 +458,8 @@ default:
                   <select
                     value={fillFactor}
                     onChange={(e) => setFillFactor(parseFloat(e.target.value))}
-                    style={{
-                      padding: '8px',
-                      borderRadius: '8px',
-                      border: '2px solid rgba(255, 122, 89, 0.5)',
-                      background: 'rgba(255, 255, 255, 0.25)',
-                      backdropFilter: 'blur(5px)',
-                      color: 'inherit',
-                      width: '100px',
-                      boxShadow: '0 0 10px rgba(255, 122, 89, 0.2)',
-                      fontWeight: '500'
-                    }}
+                    className="form-input-glass" // Apply the new class
+                    style={{ width: '100px' }} // Keep specific width inline for now
                   >
                     <option value="0.25">1/4</option>
                     <option value="0.5">1/2</option>
@@ -454,7 +468,7 @@ default:
                   </select>
                 </div>
               </div>
-              
+
               {/* Detailed volume information */}
               <VolumeResultDisplay volume={volumeResult} fillFactor={fillFactor} displayUnit={displayUnit} />
               <div style={{ textAlign: 'center', marginTop: '20px' }}>
@@ -466,499 +480,265 @@ default:
           )}
         </div>
       )}
-      
+
       {/* Custom Dimensions */}
       {activeTab === 'custom' && (
         <div className="glass-panel" style={{ marginBottom: '1.5rem', padding: '24px' }}>
+          {/* Shape selection for custom */}
           <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', justifyContent: 'center' }}>
-            <button
-              className={`btn ${customShapeType === 'rectangular' ? '' : 'btn-secondary'}`}
-              onClick={() => setCustomShapeType('rectangular')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                background: customShapeType === 'rectangular' ? 'var(--color-primary)' : 'rgba(102, 51, 153, 0.7)'
-              }}
-            >
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <RectangleIcon /> Rectangular
-              </span>
-            </button>
-            <button
-              className={`btn ${customShapeType === 'circular' ? '' : 'btn-secondary'}`}
-              onClick={() => setCustomShapeType('circular')}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                background: customShapeType === 'circular' ? 'var(--color-primary)' : 'rgba(102, 51, 153, 0.7)'
-              }}
-            >
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <CircleIcon /> Circular
-              </span>
-            </button>
-          </div>
-          
-          {customShapeType === 'rectangular' && (
-            <div className="glass-panel" style={{ padding: '20px', marginTop: '20px', border: '1px solid var(--glass-border)' }}>
-              <h3 style={{ color: 'var(--color-secondary)', marginBottom: '20px', textAlign: 'center' }}>Custom Rectangular Bed</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px', marginBottom: '20px' }}>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: 'var(--color-primary)' }}>Length</label>
-                  <input
-                    type="number"
-                    value={customRectangular.length}
-                    onChange={(e) => setCustomRectangular({...customRectangular, length: parseFloat(e.target.value)})}
-                    style={{
-                      width: '100%',
-                      padding: '10px',
-                      borderRadius: '8px',
-                      border: '2px solid rgba(255, 122, 89, 0.5)',
-                      background: 'rgba(255, 255, 255, 0.25)',
-                      backdropFilter: 'blur(5px)',
-                      color: 'inherit',
-                      boxShadow: '0 0 10px rgba(255, 122, 89, 0.2)',
-                      fontWeight: '500'
-                    }}
-                    min="0.1"
-                    step="0.1"
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: 'var(--color-primary)' }}>Width</label>
-                  <input
-                    type="number"
-                    value={customRectangular.width}
-                    onChange={(e) => setCustomRectangular({...customRectangular, width: parseFloat(e.target.value)})}
-                    style={{
-                      width: '100%',
-                      padding: '10px',
-                      borderRadius: '8px',
-                      border: '2px solid rgba(255, 122, 89, 0.5)',
-                      background: 'rgba(255, 255, 255, 0.25)',
-                      backdropFilter: 'blur(5px)',
-                      color: 'inherit',
-                      boxShadow: '0 0 10px rgba(255, 122, 89, 0.2)',
-                      fontWeight: '500'
-                    }}
-                    min="0.1"
-                    step="0.1"
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: 'var(--color-primary)' }}>Height</label>
-                  <input
-                    type="number"
-                    value={customRectangular.height}
-                    onChange={(e) => setCustomRectangular({...customRectangular, height: parseFloat(e.target.value)})}
-                    style={{
-                      width: '100%',
-                      padding: '10px',
-                      borderRadius: '8px',
-                      border: '2px solid rgba(255, 122, 89, 0.5)',
-                      background: 'rgba(255, 255, 255, 0.25)',
-                      backdropFilter: 'blur(5px)',
-                      color: 'inherit',
-                      boxShadow: '0 0 10px rgba(255, 122, 89, 0.2)',
-                      fontWeight: '500'
-                    }}
-                    min="0.1"
-                    step="0.1"
-                  />
-                </div>
-              </div>
-              <div style={{ marginBottom: '20px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: 'var(--color-primary)' }}>Length Unit</label>
-                  <select
-                    value={customRectangular.lengthUnit}
-                    onChange={(e) => setCustomRectangular({
-                      ...customRectangular,
-                      lengthUnit: e.target.value as 'inches' | 'feet' | 'cm' | 'meters'
-                    })}
-                    style={{
-                      width: '100%',
-                      padding: '10px',
-                      borderRadius: '8px',
-                      border: '2px solid rgba(255, 122, 89, 0.5)',
-                      background: 'rgba(255, 255, 255, 0.25)',
-                      backdropFilter: 'blur(5px)',
-                      color: 'inherit',
-                      boxShadow: '0 0 10px rgba(255, 122, 89, 0.2)',
-                      fontWeight: '500'
-                    }}
-                  >
-                    <option value="feet">Feet</option>
-                    <option value="inches">Inches</option>
-                    <option value="cm">Centimeters</option>
-                    <option value="meters">Meters</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: 'var(--color-primary)' }}>Width Unit</label>
-                  <select
-                    value={customRectangular.widthUnit}
-                    onChange={(e) => setCustomRectangular({
-                      ...customRectangular,
-                      widthUnit: e.target.value as 'inches' | 'feet' | 'cm' | 'meters'
-                    })}
-                    style={{
-                      width: '100%',
-                      padding: '10px',
-                      borderRadius: '8px',
-                      border: '2px solid rgba(255, 122, 89, 0.5)',
-                      background: 'rgba(255, 255, 255, 0.25)',
-                      backdropFilter: 'blur(5px)',
-                      color: 'inherit',
-                      boxShadow: '0 0 10px rgba(255, 122, 89, 0.2)',
-                      fontWeight: '500'
-                    }}
-                  >
-                    <option value="feet">Feet</option>
-                    <option value="inches">Inches</option>
-                    <option value="cm">Centimeters</option>
-                    <option value="meters">Meters</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: 'var(--color-primary)' }}>Height Unit</label>
-                  <select
-                    value={customRectangular.heightUnit}
-                    onChange={(e) => setCustomRectangular({
-                      ...customRectangular,
-                      heightUnit: e.target.value as 'inches' | 'feet' | 'cm' | 'meters'
-                    })}
-                    style={{
-                      width: '100%',
-                      padding: '10px',
-                      borderRadius: '8px',
-                      border: '2px solid rgba(255, 122, 89, 0.5)',
-                      background: 'rgba(255, 255, 255, 0.25)',
-                      backdropFilter: 'blur(5px)',
-                      color: 'inherit',
-                      boxShadow: '0 0 10px rgba(255, 122, 89, 0.2)',
-                      fontWeight: '500'
-                    }}
-                  >
-                    <option value="feet">Feet</option>
-                    <option value="inches">Inches</option>
-                    <option value="cm">Centimeters</option>
-                    <option value="meters">Meters</option>
-                  </select>
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                <button
-                  className="btn"
-                  onClick={calculateCustomVolume}
-                >
-                  Calculate Volume
-                </button>
-                {volumeResult && (
-                  <button
-                    className="btn"
-                    onClick={addCustomBed}
-                    style={{ backgroundColor: '#4CAF50' }}
-                  >
-                    Add Bed
-                  </button>
-                )}
-              </div>
-              
-              {/* Volume Result Section - appears after calculation */}
-              {volumeResult && <VolumeResultDisplay volume={volumeResult} fillFactor={fillFactor} displayUnit={displayUnit} />}
-            </div>
-          )}
-          
-          {customShapeType === 'circular' && (
-            <div className="glass-panel" style={{ padding: '20px', marginTop: '20px', border: '1px solid var(--glass-border)' }}>
-              <h3 style={{ color: 'var(--color-secondary)', marginBottom: '20px', textAlign: 'center' }}>Custom Circular Bed</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '20px' }}>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: 'var(--color-primary)' }}>Diameter</label>
-                  <input
-                    type="number"
-                    value={customCircular.diameter}
-                    onChange={(e) => setCustomCircular({...customCircular, diameter: parseFloat(e.target.value)})}
-                    style={{
-                      width: '100%',
-                      padding: '10px',
-                      borderRadius: '8px',
-                      border: '2px solid rgba(255, 122, 89, 0.5)',
-                      background: 'rgba(255, 255, 255, 0.25)',
-                      backdropFilter: 'blur(5px)',
-                      color: 'inherit',
-                      boxShadow: '0 0 10px rgba(255, 122, 89, 0.2)',
-                      fontWeight: '500'
-                    }}
-                    min="0.1"
-                    step="0.1"
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: 'var(--color-primary)' }}>Height</label>
-                  <input
-                    type="number"
-                    value={customCircular.height}
-                    onChange={(e) => setCustomCircular({...customCircular, height: parseFloat(e.target.value)})}
-                    style={{
-                      width: '100%',
-                      padding: '10px',
-                      borderRadius: '8px',
-                      border: '2px solid rgba(255, 122, 89, 0.5)',
-                      background: 'rgba(255, 255, 255, 0.25)',
-                      backdropFilter: 'blur(5px)',
-                      color: 'inherit',
-                      boxShadow: '0 0 10px rgba(255, 122, 89, 0.2)',
-                      fontWeight: '500'
-                    }}
-                    min="0.1"
-                    step="0.1"
-                  />
-                </div>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px', marginBottom: '20px' }}>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: 'var(--color-primary)' }}>Diameter Unit</label>
-                  <select
-                    value={customCircular.diameterUnit}
-                    onChange={(e) => setCustomCircular({
-                      ...customCircular,
-                      diameterUnit: e.target.value as 'inches' | 'feet' | 'cm' | 'meters'
-                    })}
-                    style={{
-                      width: '100%',
-                      padding: '10px',
-                      borderRadius: '8px',
-                      border: '2px solid rgba(255, 122, 89, 0.5)',
-                      background: 'rgba(255, 255, 255, 0.25)',
-                      backdropFilter: 'blur(5px)',
-                      color: 'inherit',
-                      boxShadow: '0 0 10px rgba(255, 122, 89, 0.2)',
-                      fontWeight: '500'
-                    }}
-                  >
-                    <option value="feet">Feet</option>
-                    <option value="inches">Inches</option>
-                    <option value="cm">Centimeters</option>
-                    <option value="meters">Meters</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: 'var(--color-primary)' }}>Height Unit</label>
-                  <select
-                    value={customCircular.heightUnit}
-                    onChange={(e) => setCustomCircular({
-                      ...customCircular,
-                      heightUnit: e.target.value as 'inches' | 'feet' | 'cm' | 'meters'
-                    })}
-                    style={{
-                      width: '100%',
-                      padding: '10px',
-                      borderRadius: '8px',
-                      border: '2px solid rgba(255, 122, 89, 0.5)',
-                      background: 'rgba(255, 255, 255, 0.25)',
-                      backdropFilter: 'blur(5px)',
-                      color: 'inherit',
-                      boxShadow: '0 0 10px rgba(255, 122, 89, 0.2)',
-                      fontWeight: '500'
-                    }}
-                  >
-                    <option value="feet">Feet</option>
-                    <option value="inches">Inches</option>
-                    <option value="cm">Centimeters</option>
-                    <option value="meters">Meters</option>
-                  </select>
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                <button
-                  className="btn"
-                  onClick={calculateCustomVolume}
-                >
-                  Calculate Volume
-                </button>
-                {volumeResult && (
-                  <button
-                    className="btn"
-                    onClick={addCustomBed}
-                    style={{ backgroundColor: '#4CAF50' }}
-                  >
-                    Add Bed
-                  </button>
-                )}
-              </div>
-              
-              {/* Volume Result Section - appears after calculation */}
-              {volumeResult && <VolumeResultDisplay volume={volumeResult} fillFactor={fillFactor} displayUnit={displayUnit} />}
-            </div>
-          )}
-        </div>
-      )}
-      
-      {/* Selected Beds List */}
-      {selectedBeds.length > 0 && (
-        <div className="glass-panel" style={{ marginBottom: '1.5rem', padding: '24px' }}>
-          <h3 style={{ color: 'var(--color-secondary)', marginBottom: '1rem', textAlign: 'center' }}>Selected Garden Beds</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {selectedBeds.map((entry) => {
-              const bed = entry.bed;
-              return (
-                <div
-                  key={entry.id}
-                  className="glass-panel"
-                  style={{ padding: '16px', border: '1px solid var(--glass-border)' }}
-                >
-                  <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
-                    <div style={{ flex: '1 1 300px' }}>
-                      <h4 style={{ color: 'var(--color-primary)', marginBottom: '8px' }}>{bed.name}</h4>
-                      <div style={{ fontSize: '0.9rem', marginBottom: '8px', opacity: 0.8 }}>
-                        {renderBedDimensions(bed)}
-                      </div>
-                      <div>
-                        <span>Volume: </span>
-                        <span style={{ fontWeight: '600', color: 'var(--color-secondary)' }}>
-                          {formatVolumeResult(applyFillFactor(entry.volumeResult, entry.savedFillFactor), 'cubic_feet')}
-                        </span>
-                      </div>
-                      <div style={{ fontSize: '0.85rem', opacity: '0.8', marginTop: '4px' }}>
-                        (Fill level: {Math.round(entry.savedFillFactor * 100)}%)
-                      </div>
-                    </div>
-                    <button
-                      className="btn"
-                      onClick={() => removeBed(entry.id)}
-                      style={{ backgroundColor: '#f44336' }}
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-      
-      {/* Total Results Section */}
-      {totalVolumeResult && (
-        <div className="glass-panel" style={{ marginBottom: '1.5rem', padding: '24px' }}>
-          <h3 style={{ color: 'var(--color-secondary)', marginBottom: '1.5rem', textAlign: 'center' }}>Total Soil Needed</h3>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
-            <div className="glass-panel" style={{ padding: '24px', border: '1px solid var(--glass-border)', textAlign: 'center' }}>
-              <div style={{ marginBottom: '8px', fontSize: '0.9rem', color: 'var(--color-accent)' }}>Total Soil Volume:</div>
-              <div style={{ fontSize: '2.5rem', fontWeight: '700', color: 'var(--color-primary)', marginBottom: '16px' }}>
-                {formatVolumeResult(totalVolumeResult, displayUnit)}
-              </div>
-              <select
-                value={displayUnit}
-                onChange={(e) => setDisplayUnit(e.target.value as VolumeUnit)}
-                style={{
-                  padding: '10px',
-                  borderRadius: '8px',
-                  border: '2px solid rgba(255, 122, 89, 0.5)',
-                  background: 'rgba(255, 255, 255, 0.25)',
-                  backdropFilter: 'blur(5px)',
-                  color: 'inherit',
-                  width: '200px',
-                  margin: '0 auto',
-                  boxShadow: '0 0 10px rgba(255, 122, 89, 0.2)',
-                  fontWeight: '500'
-                }}
-              >
-                <option value="cubic_feet">Cubic Feet</option>
-                <option value="cubic_yards">Cubic Yards</option>
-                <option value="cubic_meters">Cubic Meters</option>
-                <option value="liters">Liters</option>
-                <option value="gallons">Gallons</option>
-              </select>
-            </div>
-            
-            <div className="glass-panel" style={{ padding: '24px', border: '1px solid var(--glass-border)' }}>
-              <div style={{ marginBottom: '16px', fontSize: '0.9rem', color: 'var(--color-accent)', textAlign: 'center' }}>Also expressed as:</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
-                  <span>Cubic Feet:</span>
-                  <span style={{
-                    backgroundColor: 'var(--color-primary)',
-                    color: 'white',
-                    padding: '4px 10px',
-                    borderRadius: '20px',
-                    fontSize: '0.9rem',
-                    fontWeight: '500'
-                  }}>{totalVolumeResult.cubicFeet.toFixed(2)} ft³</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
-                  <span>Cubic Yards:</span>
-                  <span style={{
-                    backgroundColor: 'var(--color-secondary)',
-                    color: 'white',
-                    padding: '4px 10px',
-                    borderRadius: '20px',
-                    fontSize: '0.9rem',
-                    fontWeight: '500'
-                  }}>{totalVolumeResult.cubicYards.toFixed(2)} yd³</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
-                  <span>Cubic Meters:</span>
-                  <span style={{
-                    backgroundColor: '#3498db',
-                    color: 'white',
-                    padding: '4px 10px',
-                    borderRadius: '20px',
-                    fontSize: '0.9rem',
-                    fontWeight: '500'
-                  }}>{totalVolumeResult.cubicMeters.toFixed(2)} m³</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px' }}>
-                  <span>Liters:</span>
-                  <span style={{
-                    backgroundColor: 'var(--color-accent)',
-                    color: '#333',
-                    padding: '4px 10px',
-                    borderRadius: '20px',
-                    fontSize: '0.9rem',
-                    fontWeight: '500'
-                  }}>{totalVolumeResult.liters.toFixed(2)} L</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Bag Calculator section */}
-          <div className="glass-panel" style={{ marginTop: '24px', padding: '24px', border: '1px solid var(--glass-border)' }}>
-            <BagCalculator volumeTotal={totalVolumeResult.cubicFeet} />
+             <button
+               className={`btn btn-icon-layout ${customShapeType === 'rectangular' ? 'btn-active' : 'btn-secondary'}`} // Already had btn-icon-layout
+               onClick={() => setCustomShapeType('rectangular')}
+               // style prop removed
+             >
+               <RectangleIcon /> {/* Simplified structure */}
+               Rectangular
+             </button>
+             <button
+               className={`btn btn-icon-layout ${customShapeType === 'circular' ? 'btn-active' : 'btn-secondary'}`} // Already had btn-icon-layout
+               onClick={() => setCustomShapeType('circular')}
+               // style prop removed
+             >
+               <CircleIcon /> {/* Simplified structure */}
+               Circular
+             </button>
           </div>
 
-          <div className="glass-panel" style={{ marginTop: '24px', padding: '24px', border: '1px solid rgba(255, 255, 255, 0.2)', backgroundColor: 'rgba(76, 175, 80, 0.1)' }}>
-            <h4 style={{ color: 'var(--color-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '1.5rem' }}>🌱</span> Need help with soil?
-            </h4>
-            <p style={{ marginBottom: '16px', fontSize: '1.05rem' }}>
-              Most garden beds perform best with a mix of:
-            </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '16px' }}>
-              <div className="glass-panel" style={{ textAlign: 'center', padding: '16px', backgroundColor: 'rgba(255, 122, 89, 0.15)' }}>
-                <div style={{ fontSize: '2rem', fontWeight: '700', color: 'var(--color-primary)' }}>60%</div>
-                <div style={{ opacity: 0.9 }}>Topsoil</div>
+          {/* Input fields */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', marginBottom: '20px' }}>
+            {customShapeType === 'rectangular' && (
+              <>
+                {/* Length Input */}
+                <div style={{ flex: '1 1 150px' }}>
+                  <label htmlFor="customLength" style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: 'var(--color-secondary)' }}>Length</label>
+                  <div style={{ display: 'flex' }}>
+                    <input
+                      id="customLength" type="number" min="0" step="0.01"
+                      value={customRectangular.length}
+                      onChange={(e) => setCustomRectangular(prev => ({ ...prev, length: parseFloat(e.target.value) || 0 }))}
+                      className="form-input-glass form-input-glass-left" // Apply new classes
+                      style={{ width: '70%' }} // Keep width inline for split layout
+                    />
+                    <select
+                      value={customRectangular.lengthUnit}
+                      onChange={(e) => setCustomRectangular(prev => ({ ...prev, lengthUnit: e.target.value as DimensionUnit }))}
+                      className="form-input-glass form-input-glass-right" // Apply new classes
+                      style={{ width: '30%' }} // Keep width inline for split layout
+                    >
+                      <option value="feet">ft</option>
+                      <option value="inches">in</option>
+                      <option value="meters">m</option>
+                      <option value="cm">cm</option>
+                    </select>
+                  </div>
+                </div>
+                {/* Width Input */}
+                 <div style={{ flex: '1 1 150px' }}>
+                   <label htmlFor="customWidth" style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: 'var(--color-secondary)' }}>Width</label>
+                   <div style={{ display: 'flex' }}>
+                     <input
+                       id="customWidth" type="number" min="0" step="0.01"
+                       value={customRectangular.width}
+                       onChange={(e) => setCustomRectangular(prev => ({ ...prev, width: parseFloat(e.target.value) || 0 }))}
+                       className="form-input-glass form-input-glass-left" // Apply new classes
+                       style={{ width: '70%' }} // Keep width inline for split layout
+                     />
+                     <select
+                       value={customRectangular.widthUnit}
+                       onChange={(e) => setCustomRectangular(prev => ({ ...prev, widthUnit: e.target.value as DimensionUnit }))}
+                       className="form-input-glass form-input-glass-right" // Apply new classes
+                       style={{ width: '30%' }} // Keep width inline for split layout
+                     >
+                       <option value="feet">ft</option>
+                       <option value="inches">in</option>
+                       <option value="meters">m</option>
+                       <option value="cm">cm</option>
+                     </select>
+                   </div>
+                 </div>
+              </>
+            )}
+
+            {customShapeType === 'circular' && (
+              // Diameter Input
+              <div style={{ flex: '1 1 150px' }}>
+                <label htmlFor="customDiameter" style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: 'var(--color-secondary)' }}>Diameter</label>
+                <div style={{ display: 'flex' }}>
+                  <input
+                    id="customDiameter" type="number" min="0" step="0.01"
+                    value={customCircular.diameter}
+                    onChange={(e) => setCustomCircular(prev => ({ ...prev, diameter: parseFloat(e.target.value) || 0 }))}
+                    className="form-input-glass form-input-glass-left" // Apply new classes
+                    style={{ width: '70%' }} // Keep width inline for split layout
+                  />
+                  <select
+                    value={customCircular.diameterUnit}
+                    onChange={(e) => setCustomCircular(prev => ({ ...prev, diameterUnit: e.target.value as DimensionUnit }))}
+                    className="form-input-glass form-input-glass-right" // Apply new classes
+                    style={{ width: '30%' }} // Keep width inline for split layout
+                  >
+                    <option value="feet">ft</option>
+                    <option value="inches">in</option>
+                    <option value="meters">m</option>
+                    <option value="cm">cm</option>
+                  </select>
+                </div>
               </div>
-              <div className="glass-panel" style={{ textAlign: 'center', padding: '16px', backgroundColor: 'rgba(102, 51, 153, 0.15)' }}>
-                <div style={{ fontSize: '2rem', fontWeight: '700', color: 'var(--color-secondary)' }}>30%</div>
-                <div style={{ opacity: 0.9 }}>Compost</div>
-              </div>
-              <div className="glass-panel" style={{ textAlign: 'center', padding: '16px', backgroundColor: 'rgba(255, 218, 185, 0.25)' }}>
-                <div style={{ fontSize: '2rem', fontWeight: '700', color: '#e67e22' }}>10%</div>
-                <div style={{ opacity: 0.9 }}>Aeration Material</div>
+            )}
+
+            {/* Height Input (Common) */}
+            <div style={{ flex: '1 1 150px' }}>
+              <label htmlFor="customHeight" style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: 'var(--color-secondary)' }}>Height</label>
+              <div style={{ display: 'flex' }}>
+                <input
+                  id="customHeight" type="number" min="0" step="0.01"
+                  value={customShapeType === 'rectangular' ? customRectangular.height : customCircular.height}
+                  onChange={(e) => {
+                    const newHeight = parseFloat(e.target.value) || 0;
+                    if (customShapeType === 'rectangular') {
+                      setCustomRectangular(prev => ({ ...prev, height: newHeight }));
+                    } else {
+                      setCustomCircular(prev => ({ ...prev, height: newHeight }));
+                    }
+                  }}
+                  className="form-input-glass form-input-glass-left" // Apply new classes
+                  style={{ width: '70%' }} // Keep width inline for split layout
+                />
+                <select
+                  value={customShapeType === 'rectangular' ? customRectangular.heightUnit : customCircular.heightUnit}
+                  onChange={(e) => {
+                     const newUnit = e.target.value as DimensionUnit;
+                     if (customShapeType === 'rectangular') {
+                       setCustomRectangular(prev => ({ ...prev, heightUnit: newUnit }));
+                     } else {
+                       setCustomCircular(prev => ({ ...prev, heightUnit: newUnit }));
+                     }
+                  }}
+                  className="form-input-glass form-input-glass-right" // Apply new classes
+                  style={{ width: '30%' }} // Keep width inline for split layout
+                >
+                  <option value="inches">in</option>
+                  <option value="feet">ft</option>
+                  <option value="cm">cm</option>
+                  <option value="meters">m</option>
+                </select>
               </div>
             </div>
           </div>
+
+          {/* Volume Preview and Add Button */}
+          {volumeResult && (
+            <div>
+               <div className="glass-panel" style={{ marginTop: '20px', padding: '20px', border: '1px solid var(--glass-border)' }}>
+                  <h4 style={{ color: 'var(--color-primary)', marginBottom: '8px' }}>Custom {customShapeType === 'rectangular' ? 'Rectangular' : 'Circular'}</h4>
+                  {/* Display dimensions using renderBedDimensions logic or similar */}
+                  <div style={{ fontSize: '0.9rem', marginBottom: '16px', opacity: 0.8 }}>
+                     {/* Simplified display for custom */}
+                     {customShapeType === 'rectangular' ?
+                        `${customRectangular.length}${customRectangular.lengthUnit} × ${customRectangular.width}${customRectangular.widthUnit} × ${customRectangular.height}${customRectangular.heightUnit}` :
+                        `${customCircular.diameter}${customCircular.diameterUnit} diameter × ${customCircular.height}${customCircular.heightUnit}`
+                     }
+                  </div>
+                  <div>
+                     <label style={{ display: 'block', marginBottom: '8px', fontWeight: '500', color: 'var(--color-secondary)' }}>
+                       Fill Level
+                     </label>
+                     <select
+                       value={fillFactor}
+                       onChange={(e) => setFillFactor(parseFloat(e.target.value))}
+                       className="form-input-glass" // Apply new class
+                       style={{ width: '100px' }} // Keep specific width inline for now
+                     >
+                       <option value="0.25">1/4</option>
+                       <option value="0.5">1/2</option>
+                       <option value="0.75">3/4</option>
+                       <option value="1">Full</option>
+                     </select>
+                  </div>
+               </div>
+               <VolumeResultDisplay volume={volumeResult} fillFactor={fillFactor} displayUnit={displayUnit} />
+               <div style={{ textAlign: 'center', marginTop: '20px' }}>
+                 <button className="btn" onClick={addCustomBed} style={{ backgroundColor: '#4CAF50' }}>
+                   Add Custom Bed
+                 </button>
+               </div>
+            </div>
+          )}
         </div>
       )}
-      
-      
+
+      {/* Selected Beds List */}
+      {selectedBeds.length > 0 && (
+        <div className="glass-panel" style={{ marginTop: '1.5rem', padding: '24px' }}>
+          <h3 style={{ color: 'var(--color-secondary)', marginBottom: '1rem', textAlign: 'center' }}>Selected Beds</h3>
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+            {selectedBeds.map((entry) => (
+              <li key={entry.id} style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '12px 0',
+                borderBottom: '1px solid var(--glass-border)',
+                gap: '10px'
+              }}>
+                <div style={{ flexGrow: 1 }}>
+                  <div style={{ fontWeight: '500', color: 'var(--color-primary)' }}>{entry.bed.name}</div>
+                  <div style={{ fontSize: '0.85rem', opacity: 0.8 }}>
+                     {/* Use updated renderBedDimensions */}
+                     {renderBedDimensions(entry.bed)}
+                     {entry.savedFillFactor !== 1 && ` (Filled ${entry.savedFillFactor * 100}%)`}
+                  </div>
+                </div>
+                <div style={{ fontWeight: '600', color: 'var(--color-accent)', whiteSpace: 'nowrap' }}>
+                  {/* Display volume adjusted by saved fill factor */}
+                  {formatVolumeResult(applyFillFactor(entry.volumeResult, entry.savedFillFactor), displayUnit)}
+                </div>
+                <button
+                  onClick={() => removeBed(entry.id)}
+                  className="btn btn-secondary"
+                  style={{ padding: '5px 10px', fontSize: '0.8rem', background: 'rgba(220, 53, 69, 0.7)', color: 'white' }}
+                  aria-label={`Remove ${entry.bed.name}`}
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          {/* Total Volume Display */}
+          {totalVolumeResult && (
+             <div style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '2px solid var(--color-primary)' }}>
+                <h3 style={{ color: 'var(--color-secondary)', marginBottom: '1rem', textAlign: 'center' }}>Total Soil Needed</h3>
+                <VolumeResultDisplay volume={totalVolumeResult} fillFactor={1} displayUnit={displayUnit} />
+
+                {/* Unit Selector for Total */}
+                <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+                   <label style={{ marginRight: '10px', fontWeight: '500', color: 'var(--color-secondary)' }}>Display Total In:</label>
+                   <select
+                      value={displayUnit}
+                      onChange={(e) => setDisplayUnit(e.target.value as VolumeUnit)}
+                      className="form-input-glass" // Apply new class
+                      style={{ minWidth: '180px' }} // Add some min-width
+                   >
+                      <option value="cubic_feet">Cubic Feet (ft³)</option>
+                      <option value="cubic_yards">Cubic Yards (yd³)</option>
+                      <option value="cubic_meters">Cubic Meters (m³)</option>
+                      <option value="liters">Liters (L)</option>
+                      <option value="gallons">Gallons (gal)</option>
+                   </select>
+                </div>
+
+                {/* Bag Calculator Integration */}
+                <div style={{ marginTop: '2rem' }}>
+                   <BagCalculator volumeTotal={totalVolumeResult.cubicFeet} />
+                </div>
+             </div>
+          )}
+        </div>
+      )}
     </div>
-  )
+  );
 }
+
+// Helper type from calculations needed here if not imported globally
+// export type DimensionUnit = 'inches' | 'feet' | 'cm' | 'meters';

@@ -1,14 +1,36 @@
 import Footer from './components/Footer';
 import GardenBedSelector from './components/GardenBedSelector';
 import { CalculatorIcon, RulerIcon, SaveIcon } from './components/Icons';
+import { DarkModeToggle } from './components/DarkModeToggle'; // Import the toggle
+import Image from 'next/image'; // Import the Image component
 
 export default function Home() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <main style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem 0' }}>
+      {/* Add position: relative for absolute positioning of children */}
+      <main style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem 0', position: 'relative' }}>
+        <DarkModeToggle /> {/* Add the toggle button */}
         {/* Hero Section - Glassmorphism header */}
         <div className="glass-panel bento-span-12" style={{ textAlign: 'center', marginBottom: '2rem', maxWidth: '1200px', width: '90%' }}>
-          <h1 style={{ color: 'var(--color-primary)', marginBottom: '1rem' }}>Garden Soil Calculator</h1>
+          {/* Replace H1 with the logo image */}
+          {/* Container needs relative position and defined size for fill */}
+          <div style={{ 
+            position: 'relative', 
+            width: '80%', // Responsive width relative to parent
+            maxWidth: '500px', // Max width for the logo
+            height: '80px', // Explicit height (adjust as needed)
+            margin: '0 auto 1rem auto', // Center block element and add bottom margin
+            display: 'block' // Ensure it takes block layout for centering
+          }}>
+            <Image
+              src="/Garden Bed Soil Calculator Logo.webp" // Path relative to /public
+              alt="Garden Bed Soil Calculator Logo"
+              fill // Make image fill the container
+              sizes="(max-width: 768px) 80vw, 500px" // Optimize for different viewports
+              style={{ objectFit: 'contain' }} // Ensure aspect ratio is maintained
+              priority // Prioritize loading the logo
+            />
+          </div>
           <p style={{ maxWidth: '42rem', margin: '0 auto', fontSize: '1.1rem' }}>
             Quickly calculate the exact amount of soil you need for your garden beds with our easy-to-use calculator.
           </p>
@@ -53,7 +75,8 @@ export default function Home() {
 
           {/* Tips & Facts Panel - Full width panel at bottom */}
           <div className="glass-panel bento-span-12" style={{ textAlign: 'center' }}>
-            <h2 style={{ color: 'var(--color-secondary)', marginBottom: '1rem' }}>Gardening Tips</h2>
+            {/* Apply the new class here */}
+            <h2 className="heading-on-glass" style={{ color: 'var(--color-secondary)', marginBottom: '1rem' }}>Gardening Tips</h2>
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px' }}>
               <div style={{ flex: '1 1 300px', padding: '1rem', backgroundColor: 'rgba(255, 122, 89, 0.15)', borderRadius: '12px', backdropFilter: 'blur(5px)' }}>
                 <h3 style={{ color: 'var(--color-primary)' }}>Soil Mix</h3>

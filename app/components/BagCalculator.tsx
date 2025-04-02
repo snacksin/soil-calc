@@ -32,17 +32,7 @@ const BagCalculator: React.FC<BagCalculatorProps> = ({ volumeTotal }) => {
             step="0.01"
             min="0.01"
             onChange={handleBagSizeChange}
-            style={{
-              width: '100%',
-              padding: '10px',
-              borderRadius: '8px',
-              border: '2px solid rgba(255, 122, 89, 0.5)',
-              background: 'rgba(255, 255, 255, 0.25)',
-              backdropFilter: 'blur(5px)',
-              color: 'inherit',
-              boxShadow: '0 0 10px rgba(255, 122, 89, 0.2)',
-              fontWeight: '500'
-            }}
+            className="form-input-glass" // Apply the new class
           />
         </div>
       </div>
